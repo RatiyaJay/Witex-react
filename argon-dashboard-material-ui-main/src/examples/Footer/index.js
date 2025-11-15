@@ -28,28 +28,23 @@ import ArgonTypography from "components/ArgonTypography";
 import typography from "assets/theme/base/typography";
 
 function Footer({ company, links }) {
-  const fallbackCompany = { href: "https://www.creative-tim.com/", name: "Creative Tim" };
-  const { href, name } = (company ?? fallbackCompany);
-  const safeLinks = Array.isArray(links)
-    ? links
-    : [
-        { href: "https://www.creative-tim.com/", name: "Creative Tim" },
-        { href: "https://www.creative-tim.com/presentation", name: "About Us" },
-        { href: "https://www.creative-tim.com/blog", name: "Blog" },
-        { href: "https://www.creative-tim.com/license", name: "License" },
-      ];
+  const fallbackCompany = { href: "#", name: "technotex solutions" };
+  const { href, name } = company ?? fallbackCompany;
+  const safeLinks = Array.isArray(links) ? links : [];
   const { size } = typography;
 
   const renderLinks = () =>
-    safeLinks.map((link) => (
-      <ArgonBox key={link.name} component="li" px={2} lineHeight={1}>
-        <Link href={link.href} target="_blank">
-          <ArgonTypography variant="button" fontWeight="regular" color="text">
-            {link.name}
-          </ArgonTypography>
-        </Link>
-      </ArgonBox>
-    ));
+    safeLinks.length === 0
+      ? null
+      : safeLinks.map((link) => (
+          <ArgonBox key={link.name} component="li" px={2} lineHeight={1}>
+            <Link href={link.href} target="_blank">
+              <ArgonTypography variant="button" fontWeight="regular" color="text">
+                {link.name}
+              </ArgonTypography>
+            </Link>
+          </ArgonBox>
+        ));
 
   return (
     <ArgonBox
@@ -69,19 +64,11 @@ function Footer({ company, links }) {
         fontSize={size.sm}
         px={1.5}
       >
-        &copy; {new Date().getFullYear()}, made with
-        <ArgonBox fontSize={size.md} color="text" mb={-0.5} mx={0.25}>
-          <Icon color="inherit" fontSize="inherit">
-            favorite
-          </Icon>
-        </ArgonBox>
-        by
         <Link href={href} target="_blank">
-          <ArgonTypography variant="button" fontWeight="medium">
-            &nbsp;{name}&nbsp;
+          <ArgonTypography variant="button" fontWeight="medium" color="text">
+            {name}
           </ArgonTypography>
         </Link>
-        for a better web.
       </ArgonBox>
       <ArgonBox
         component="ul"
@@ -102,19 +89,14 @@ function Footer({ company, links }) {
       >
         {renderLinks()}
       </ArgonBox>
-    </ArgonBox>
+  </ArgonBox>
   );
 }
 
 // Setting default values for the props of Footer
 Footer.defaultProps = {
-  company: { href: "https://www.creative-tim.com/", name: "Creative Tim" },
-  links: [
-    { href: "https://www.creative-tim.com/", name: "Creative Tim" },
-    { href: "https://www.creative-tim.com/presentation", name: "About Us" },
-    { href: "https://www.creative-tim.com/blog", name: "Blog" },
-    { href: "https://www.creative-tim.com/license", name: "License" },
-  ],
+  company: { href: "#", name: "technotex solutions" },
+  links: [],
 };
 
 // Typechecking props for the Footer

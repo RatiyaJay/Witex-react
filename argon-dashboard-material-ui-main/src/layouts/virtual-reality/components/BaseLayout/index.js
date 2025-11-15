@@ -43,9 +43,9 @@ import {
   baseLayoutContent,
 } from "layouts/virtual-reality/components/BaseLayout/styles";
 
-// Images
-import brand from "assets/images/logo-ct.png";
-import brandDark from "assets/images/logo-ct-dark.png";
+// Brand logo (use single logo everywhere)
+const brand = process.env.PUBLIC_URL + "/technotexsolutions.png";
+const brandDark = brand;
 
 function BaseLayout({ children }) {
   const [controller, dispatch] = useArgonController();
@@ -85,7 +85,7 @@ function BaseLayout({ children }) {
           <Sidenav
             color={sidenavColor}
             brand={darkSidenav || darkMode ? brand : brandDark}
-            brandName="Argon Dashboard 2 PRO"
+            brandName="Technotex Solutions"
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
@@ -96,7 +96,7 @@ function BaseLayout({ children }) {
             <Sidenav
               color={sidenavColor}
               brand={darkSidenav || darkMode ? brand : brandDark}
-              brandName="Argon Dashboard 2 PRO"
+              brandName="Technotex Solutions"
               routes={routes}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
