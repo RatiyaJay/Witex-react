@@ -49,11 +49,13 @@ function MachineManagement() {
     qualityName: "",
     greyQuality: "",
     pick: "",
+    productionShift: "",
     productionDay: "",
     productionMonth: "",
     dobbyType: "loom",
     reed: "",
     weftYarn: "",
+    shiftType: "Day",
     shift: "", // (ne)
     powerOnTime: "", // (ne)
     runningTime: "", // (ne)
@@ -87,39 +89,150 @@ function MachineManagement() {
   }, [rows, page, totalPages]);
 
   const dobbyOptions = ["hobby", "loom", "plain", "jacquard"];
-  const motorKwOptions = ["3.7", "5.5", "7.5", "11", "15"]; // example options
+  const motorKwOptions = ["3.7", "5.5", "7.5", "11", "15"];
+  const shiftOptions = ["Day", "Night"];
 
   const columns = [
-    { field: "machineNumber", headerName: "Machine No.", flex: 0.18, minWidth: 140 },
-    { field: "efficiency", headerName: "Efficiency", flex: 0.14, minWidth: 110 },
-    { field: "current", headerName: "Current", flex: 0.12, minWidth: 100 },
-    { field: "rpm", headerName: "RPM", flex: 0.12, minWidth: 90 },
-    { field: "qualityName", headerName: "Quality Name", flex: 0.22, minWidth: 160 },
-    { field: "greyQuality", headerName: "Grey Quality", flex: 0.22, minWidth: 160 },
-    { field: "pick", headerName: "Pick", flex: 0.12, minWidth: 90 },
-    { field: "productionDay", headerName: "Prod (Day)", flex: 0.16, minWidth: 120 },
-    { field: "productionMonth", headerName: "Prod (Month)", flex: 0.18, minWidth: 140 },
-    { field: "dobbyType", headerName: "Dobby", flex: 0.12, minWidth: 100 },
-    { field: "reed", headerName: "Reed", flex: 0.14, minWidth: 110 },
-    { field: "weftYarn", headerName: "Weft Yarn", flex: 0.2, minWidth: 150 },
+    { 
+      field: "machineNumber", 
+      headerName: "Machine No.", 
+      width: 120,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "efficiency", 
+      headerName: "Efficiency", 
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => `${params.value}%`
+    },
+    { 
+      field: "current", 
+      headerName: "Current", 
+      width: 90,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "rpm", 
+      headerName: "RPM", 
+      width: 80,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "qualityName", 
+      headerName: "Quality Name", 
+      width: 140
+    },
+    { 
+      field: "greyQuality", 
+      headerName: "Grey Quality", 
+      width: 120
+    },
+    { 
+      field: "pick", 
+      headerName: "Pick", 
+      width: 80,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "productionShift", 
+      headerName: "Prod (Shift)", 
+      width: 110,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "productionDay", 
+      headerName: "Prod (Day)", 
+      width: 110,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "dobbyType", 
+      headerName: "Dobby", 
+      width: 100,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "reed", 
+      headerName: "Reed", 
+      width: 90,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "shiftType", 
+      headerName: "Shift", 
+      width: 90,
+      headerAlign: "center",
+      align: "center"
+    },
     {
       field: "actions",
       headerName: "Actions",
-      flex: 0.16,
-      minWidth: 160,
+      width: 120,
       sortable: false,
       filterable: false,
-      align: "right",
-      headerAlign: "right",
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <ArgonBox display="flex" justifyContent="flex-end" width="100%" gap={0.5}>
-          <IconButton title="Details" size="small" color="info" onClick={() => handleShowDetails(params.row)}>
+        <ArgonBox display="flex" justifyContent="center" width="100%" gap={0.5}>
+          <IconButton 
+            title="View Details" 
+            size="small" 
+            color="info" 
+            onClick={() => handleShowDetails(params.row)}
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.08)",
+                backgroundColor: "rgba(33, 150, 243, 0.12)",
+                boxShadow: "0 2px 8px rgba(33, 150, 243, 0.3)",
+              },
+            }}
+          >
             <Icon fontSize="small">visibility</Icon>
           </IconButton>
-          <IconButton title="Edit" size="small" color="primary" onClick={() => handleEdit(params.row)}>
+          <IconButton 
+            title="Edit" 
+            size="small" 
+            color="primary" 
+            onClick={() => handleEdit(params.row)}
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.08)",
+                backgroundColor: "rgba(76, 175, 80, 0.12)",
+                boxShadow: "0 2px 8px rgba(76, 175, 80, 0.3)",
+              },
+            }}
+          >
             <Icon fontSize="small">edit</Icon>
           </IconButton>
-          <IconButton title="Delete" size="small" color="error" onClick={() => handleDeleteClick(params.row)}>
+          <IconButton 
+            title="Delete" 
+            size="small" 
+            color="error" 
+            onClick={() => handleDeleteClick(params.row)}
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.08)",
+                backgroundColor: "rgba(244, 67, 54, 0.12)",
+                boxShadow: "0 2px 8px rgba(244, 67, 54, 0.3)",
+              },
+            }}
+          >
             <Icon fontSize="small">delete</Icon>
           </IconButton>
         </ArgonBox>
@@ -130,19 +243,35 @@ function MachineManagement() {
   const handleAddClick = () => {
     setFormMode("add");
     setEditingId(null);
+    
+    // Auto-generate next machine number in format MC001, MC002, etc.
+    const existingMachineNumbers = rows
+      .map(r => r.machineNumber)
+      .filter(num => /^MC\d+$/.test(num))
+      .map(num => parseInt(num.replace('MC', ''), 10))
+      .filter(num => !isNaN(num));
+    
+    const nextNumber = existingMachineNumbers.length > 0 
+      ? Math.max(...existingMachineNumbers) + 1 
+      : 1;
+    
+    const nextMachineNumber = `MC${String(nextNumber).padStart(3, '0')}`;
+    
     setForm({
-      machineNumber: "",
+      machineNumber: nextMachineNumber,
       efficiency: "",
       current: "",
       rpm: "",
       qualityName: "",
       greyQuality: "",
       pick: "",
+      productionShift: "",
       productionDay: "",
       productionMonth: "",
       dobbyType: "loom",
       reed: "",
       weftYarn: "",
+      shiftType: "Day",
       shift: "",
       powerOnTime: "",
       runningTime: "",
@@ -266,52 +395,103 @@ function MachineManagement() {
           <Grid item xs={12}>
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <ArgonTypography variant="h4">Machine Management</ArgonTypography>
-              <ArgonBox display="flex" gap={1}>
-                <ArgonButton color="primary" variant="gradient" onClick={handleAddClick}>
-                  <Icon sx={{ mr: 1 }}>add</Icon> Add Machine
-                </ArgonButton>
-                <ArgonButton color="dark" variant="outlined" onClick={exportCsv}>
-                  <Icon sx={{ mr: 1 }}>file_download</Icon> Export CSV
-                </ArgonButton>
-              </ArgonBox>
+              <ArgonButton 
+                color="dark" 
+                variant="outlined" 
+                onClick={exportCsv}
+                sx={{
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "scale(1.03)",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  },
+                }}
+              >
+                <Icon sx={{ mr: 1 }}>file_download</Icon> Export CSV
+              </ArgonButton>
             </ArgonBox>
-            <Card>
-              <ArgonBox p={3}>
-                <div style={{ height: 520, width: "100%" }}>
+            <Card sx={{ overflow: "hidden", borderRadius: "12px" }}>
+              <ArgonBox p={2}>
+                <div style={{ height: 480, width: "100%" }}>
                   <DataGrid
-                    density="compact"
                     rows={paginatedRows}
                     columns={columns}
                     disableColumnMenu
+                    disableRowSelectionOnClick
                     hideFooter
                     getRowId={(row) => row.id}
-                    rowHeight={36}
-                    headerHeight={40}
-                    sx={{ width: "100%" }}
+                    rowHeight={52}
+                    columnHeaderHeight={48}
+                    sx={{
+                      border: "none",
+                      "& .MuiDataGrid-cell": {
+                        borderBottom: "1px solid #f0f2f5",
+                      },
+                      "& .MuiDataGrid-columnHeaders": {
+                        backgroundColor: "#f8f9fa",
+                        borderBottom: "2px solid #e9ecef",
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                      },
+                      "& .MuiDataGrid-row:hover": {
+                        backgroundColor: "#f8f9fa",
+                      },
+                    }}
                   />
                 </div>
-                <ArgonBox mt={1} display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
-                  <ArgonButton
-                    size="small"
-                    variant="outlined"
-                    color="secondary"
-                    disabled={page === 0}
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  >
-                    Previous
-                  </ArgonButton>
+                <ArgonBox 
+                  mt={2} 
+                  pt={2}
+                  borderTop="1px solid #e9ecef"
+                  display="flex" 
+                  alignItems="center" 
+                  justifyContent="space-between"
+                  flexWrap="wrap"
+                  gap={2}
+                >
                   <ArgonTypography variant="caption" color="text">
-                    Page {page + 1} of {totalPages}
+                    Showing {paginatedRows.length} of {rows.length} machines
                   </ArgonTypography>
-                  <ArgonButton
-                    size="small"
-                    variant="outlined"
-                    color="secondary"
-                    disabled={page >= totalPages - 1}
-                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                  >
-                    Next
-                  </ArgonButton>
+                  <ArgonBox display="flex" alignItems="center" gap={1}>
+                    <ArgonButton
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                      disabled={page === 0}
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      sx={{
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover:not(:disabled)": {
+                          transform: "scale(1.05)",
+                          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+                        },
+                      }}
+                    >
+                      <Icon fontSize="small">chevron_left</Icon>
+                    </ArgonButton>
+                    <ArgonTypography variant="button" color="text" px={2}>
+                      {page + 1} / {totalPages}
+                    </ArgonTypography>
+                    <ArgonButton
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                      disabled={page >= totalPages - 1}
+                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                      sx={{
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover:not(:disabled)": {
+                          transform: "scale(1.05)",
+                          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+                        },
+                      }}
+                    >
+                      <Icon fontSize="small">chevron_right</Icon>
+                    </ArgonButton>
+                  </ArgonBox>
                 </ArgonBox>
               </ArgonBox>
             </Card>
@@ -320,7 +500,15 @@ function MachineManagement() {
       </ArgonBox>
 
       {/* Details Modal */}
-      <Dialog open={openDetails} onClose={handleCloseDetails} maxWidth="md" fullWidth>
+      <Dialog 
+        open={openDetails} 
+        onClose={handleCloseDetails} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "12px" }
+        }}
+      >
         <DialogTitle>
           <ArgonTypography variant="h5">Machine Details</ArgonTypography>
         </DialogTitle>
@@ -414,50 +602,166 @@ function MachineManagement() {
           )}
         </DialogContent>
         <DialogActions>
-          <ArgonButton onClick={handleCloseDetails} color="secondary" variant="outlined">
+          <ArgonButton 
+            onClick={handleCloseDetails} 
+            color="secondary" 
+            variant="outlined"
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+              },
+            }}
+          >
             Close
           </ArgonButton>
         </DialogActions>
       </Dialog>
 
       {/* Add/Edit Form */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth>
+      <Dialog 
+        open={openForm} 
+        onClose={() => setOpenForm(false)} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "12px" }
+        }}
+      >
         <DialogTitle>
           <ArgonTypography variant="h5">{formMode === "add" ? "Add Machine" : "Edit Machine"}</ArgonTypography>
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 0 }}>
+          <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
             <Grid item xs={12} sm={4}>
-              <ArgonInput value={form.machineNumber} onChange={(e) => handleFormChange("machineNumber", e.target.value)} placeholder="Machine No." label="Machine No." />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Machine No.
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.machineNumber} 
+                onChange={(e) => handleFormChange("machineNumber", e.target.value)} 
+                placeholder="MC001" 
+                disabled={formMode === "add"}
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput type="number" value={form.efficiency} onChange={(e) => handleFormChange("efficiency", e.target.value)} placeholder="Efficiency" label="Efficiency" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Efficiency (%)
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.efficiency} 
+                onChange={(e) => handleFormChange("efficiency", e.target.value)} 
+                placeholder="92.5" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput type="number" value={form.current} onChange={(e) => handleFormChange("current", e.target.value)} placeholder="Current" label="Current" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Current
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.current} 
+                onChange={(e) => handleFormChange("current", e.target.value)} 
+                placeholder="12.3" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput type="number" value={form.rpm} onChange={(e) => handleFormChange("rpm", e.target.value)} placeholder="RPM" label="RPM" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  RPM
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.rpm} 
+                onChange={(e) => handleFormChange("rpm", e.target.value)} 
+                placeholder="180" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput value={form.qualityName} onChange={(e) => handleFormChange("qualityName", e.target.value)} placeholder="Quality Name" label="Quality Name" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Quality Name
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.qualityName} 
+                onChange={(e) => handleFormChange("qualityName", e.target.value)} 
+                placeholder="SuperSoft" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput value={form.greyQuality} onChange={(e) => handleFormChange("greyQuality", e.target.value)} placeholder="Grey Quality" label="Grey Quality" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Grey Quality
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.greyQuality} 
+                onChange={(e) => handleFormChange("greyQuality", e.target.value)} 
+                placeholder="GS-30D" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput type="number" value={form.pick} onChange={(e) => handleFormChange("pick", e.target.value)} placeholder="Pick" label="Pick" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Pick
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.pick} 
+                onChange={(e) => handleFormChange("pick", e.target.value)} 
+                placeholder="28" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput type="number" value={form.productionDay} onChange={(e) => handleFormChange("productionDay", e.target.value)} placeholder="Production (Day)" label="Production (Day)" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Production (Shift)
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.productionShift} 
+                onChange={(e) => handleFormChange("productionShift", e.target.value)} 
+                placeholder="180" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput type="number" value={form.productionMonth} onChange={(e) => handleFormChange("productionMonth", e.target.value)} placeholder="Production (Month)" label="Production (Month)" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Production (Day)
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.productionDay} 
+                onChange={(e) => handleFormChange("productionDay", e.target.value)} 
+                placeholder="520.4" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Dobby Type
+                </ArgonTypography>
+              </ArgonBox>
               <FormControl fullWidth>
-                <InputLabel>Dobby</InputLabel>
-                <Select value={form.dobbyType} label="Dobby" onChange={(e) => handleFormChange("dobbyType", e.target.value)}>
+                <Select 
+                  value={form.dobbyType} 
+                  onChange={(e) => handleFormChange("dobbyType", e.target.value)}
+                  sx={{ height: "42px" }}
+                >
                   {dobbyOptions.map((o) => (
                     <MenuItem key={o} value={o}>{o}</MenuItem>
                   ))}
@@ -465,29 +769,84 @@ function MachineManagement() {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput value={form.reed} onChange={(e) => handleFormChange("reed", e.target.value)} placeholder="Reed" label="Reed" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Reed
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.reed} 
+                onChange={(e) => handleFormChange("reed", e.target.value)} 
+                placeholder="60/2" 
+              />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <ArgonInput value={form.weftYarn} onChange={(e) => handleFormChange("weftYarn", e.target.value)} placeholder="Weft Yarn" label="Weft Yarn" />
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Weft Yarn
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.weftYarn} 
+                onChange={(e) => handleFormChange("weftYarn", e.target.value)} 
+                placeholder="Polyester 30D" 
+              />
             </Grid>
-
-            {/* Non-editable fields (ne) */}
-            {["shift","powerOnTime","runningTime","stopTime","fillerTime","machineStop","sensorStop","otherStop","totalStop","beamNo","minCurrent","maxCurrent"].map((key) => (
-              <Grid item xs={12} sm={4} key={key}>
-                <ArgonInput value={form[key]} onChange={(e) => handleFormChange(key, e.target.value)} placeholder={`${key}`} label={`${key} (ne)`} disabled />
-              </Grid>
-            ))}
-
-            <Grid item xs={12} sm={6}>
-              <ArgonInput value={form.beamLoadingDateTime} onChange={(e) => handleFormChange("beamLoadingDateTime", e.target.value)} placeholder="Beam Loading Date & Time" label="Beam Loading Date & Time" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonInput type="number" value={form.remainingBeamMeter} onChange={(e) => handleFormChange("remainingBeamMeter", e.target.value)} placeholder="Remaining Beam Meter" label="Remaining Beam Meter" />
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Shift
+                </ArgonTypography>
+              </ArgonBox>
               <FormControl fullWidth>
-                <InputLabel>Motor (kW)</InputLabel>
-                <Select value={form.motorKw} label="Motor (kW)" onChange={(e) => handleFormChange("motorKw", e.target.value)}>
+                <Select 
+                  value={form.shiftType} 
+                  onChange={(e) => handleFormChange("shiftType", e.target.value)}
+                  sx={{ height: "42px" }}
+                >
+                  {shiftOptions.map((o) => (
+                    <MenuItem key={o} value={o}>{o}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Beam Loading Date & Time
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.beamLoadingDateTime} 
+                onChange={(e) => handleFormChange("beamLoadingDateTime", e.target.value)} 
+                placeholder="2025-02-05 09:20" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Remaining Beam Meter
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.remainingBeamMeter} 
+                onChange={(e) => handleFormChange("remainingBeamMeter", e.target.value)} 
+                placeholder="420.5" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Motor (kW)
+                </ArgonTypography>
+              </ArgonBox>
+              <FormControl fullWidth>
+                <Select 
+                  value={form.motorKw} 
+                  onChange={(e) => handleFormChange("motorKw", e.target.value)}
+                  sx={{ height: "42px" }}
+                >
                   {motorKwOptions.map((o) => (
                     <MenuItem key={o} value={o}>{o}</MenuItem>
                   ))}
@@ -497,17 +856,49 @@ function MachineManagement() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <ArgonButton onClick={() => setOpenForm(false)} color="secondary" variant="outlined">
+          <ArgonButton 
+            onClick={() => setOpenForm(false)} 
+            color="secondary" 
+            variant="outlined"
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+              },
+            }}
+          >
             Cancel
           </ArgonButton>
-          <ArgonButton onClick={handleFormSubmit} color="primary" variant="gradient">
+          <ArgonButton 
+            onClick={handleFormSubmit} 
+            color="primary" 
+            variant="gradient"
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)",
+              },
+            }}
+          >
             <Icon sx={{ mr: 1 }}>save</Icon> Save
           </ArgonButton>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation */}
-      <Dialog open={openDelete} onClose={() => setOpenDelete(false)} maxWidth="xs" fullWidth>
+      <Dialog 
+        open={openDelete} 
+        onClose={() => setOpenDelete(false)} 
+        maxWidth="xs" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "12px" }
+        }}
+      >
         <DialogTitle>
           <ArgonTypography variant="h6">Delete Machine</ArgonTypography>
         </DialogTitle>
@@ -517,10 +908,34 @@ function MachineManagement() {
           </ArgonTypography>
         </DialogContent>
         <DialogActions>
-          <ArgonButton variant="outlined" color="dark" onClick={() => setOpenDelete(false)}>
+          <ArgonButton 
+            variant="outlined" 
+            color="dark" 
+            onClick={() => setOpenDelete(false)}
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+              },
+            }}
+          >
             Cancel
           </ArgonButton>
-          <ArgonButton color="error" variant="gradient" onClick={handleDeleteConfirm}>
+          <ArgonButton 
+            color="error" 
+            variant="gradient" 
+            onClick={handleDeleteConfirm}
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: "0 4px 12px rgba(244, 67, 54, 0.3)",
+              },
+            }}
+          >
             Delete
           </ArgonButton>
         </DialogActions>
