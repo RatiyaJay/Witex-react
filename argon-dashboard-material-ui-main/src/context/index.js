@@ -70,7 +70,7 @@ function ArgonControllerProvider({ children }) {
   const initialState = {
     miniSidenav: false,
     darkSidenav: false,
-    sidenavColor: null,
+    sidenavColor: "warning",
     transparentNavbar: true,
     fixedNavbar: false,
     openConfigurator: false,

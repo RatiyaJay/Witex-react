@@ -14,6 +14,9 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import Icon from "@mui/material/Icon";
 import { DataGrid } from "@mui/x-data-grid";
+import { useTheme } from "@mui/material/styles";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
@@ -23,8 +26,19 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import { beamsData as initialBeams } from "./data";
+import { machinesData } from "../machine-management/data";
+import { useArgonController } from "context";
+import { 
+  getTableStyles, 
+  getCardStyles, 
+  getPaginationButtonStyles, 
+  getExportButtonStyles 
+} from "utils/tableStyles";
 
 function BeamFlow() {
+  const [controller] = useArgonController();
+  const { darkMode, sidenavColor } = controller;
+  const theme = useTheme();
   const [tab, setTab] = useState("added");
   const [rows, setRows] = useState(initialBeams);
   const [gridReady, setGridReady] = useState(false);
@@ -49,9 +63,10 @@ function BeamFlow() {
       matches(r.beamDate) ||
       matches(r.partyName) ||
       matches(r.yarnQuality) ||
-      matches(r.lofNo) ||
+      matches(r.machineNo) ||
+      matches(r.lotNo) ||
       matches(r.beamLength) ||
-      matches(r.panNo) ||
+      matches(r.pannaNo) ||
       matches(r.danier) ||
       matches(r.totalEnds) ||
       matches(r.krills) ||
@@ -68,12 +83,65 @@ function BeamFlow() {
   }, [filteredRows, page, totalPages]);
 
   const columns = [
-    { field: "beamNo", headerName: "Beam No.", flex: 0.9, minWidth: 120 },
-    { field: "beamDate", headerName: "Beam Date", flex: 0.9, minWidth: 130 },
-    { field: "partyName", headerName: "Party Name", flex: 1.2, minWidth: 180 },
-    { field: "yarnQuality", headerName: "Yarn Quality", flex: 1.1, minWidth: 160 },
-    { field: "lofNo", headerName: "LOF No.", flex: 0.9, minWidth: 120 },
-    { field: "beamLength", headerName: "Beam Length", flex: 0.9, minWidth: 130, type: "number" },
+    { field: "beamNo", headerName: "Beam No.", width: 110, align: "center", headerAlign: "center" },
+    { 
+      field: "machineNo", 
+      headerName: "Machine No", 
+      width: 110, 
+      align: "center", 
+      headerAlign: "center",
+      editable: tab === "added",
+      type: "singleSelect",
+      valueOptions: machinesData.map(m => m.machineNumber),
+    },
+    { field: "partyName", headerName: "Party Name", width: 150, align: "center", headerAlign: "center" },
+    { field: "beamLength", headerName: "Beam Length", width: 120, type: "number", align: "center", headerAlign: "center" },
+    { field: "remainingMeter", headerName: "Remaining Meter", width: 140, type: "number", align: "center", headerAlign: "center" },
+    { field: "remainingPercentage", headerName: "Remaining %", width: 130, align: "center", headerAlign: "center" },
+    { field: "daysToFinish", headerName: "Days To Finish", width: 130, type: "number", align: "center", headerAlign: "center" },
+    { 
+      field: "pick", 
+      headerName: "Pick", 
+      width: 90,
+      align: "center",
+      headerAlign: "center",
+      valueGetter: (params) => {
+        const machine = machinesData.find(m => m.machineNumber === params.row.machineNo);
+        return machine ? machine.pick : "-";
+      }
+    },
+    { field: "pipeNumber", headerName: "Pipe Number", width: 120, align: "center", headerAlign: "center" },
+    { field: "totalEnds", headerName: "Ends", width: 100, type: "number", align: "center", headerAlign: "center" },
+    { field: "pannaNo", headerName: "PANNO", width: 140, align: "center", headerAlign: "center" },
+    { field: "danier", headerName: "Danier", width: 90, align: "center", headerAlign: "center" },
+    { field: "startSerialTaka", headerName: "Start Serial Taka", width: 140, type: "number", align: "center", headerAlign: "center", editable: tab === "added" },
+    { field: "endSerialTaka", headerName: "End Serial Taka", width: 140, type: "number", align: "center", headerAlign: "center", editable: tab === "added" },
+    { 
+      field: "totalFoldingTaka", 
+      headerName: "Total Folding Taka", 
+      width: 150, 
+      type: "number", 
+      align: "center", 
+      headerAlign: "center",
+      valueGetter: (params) => {
+        const start = Number(params.row.startSerialTaka) || 0;
+        const end = Number(params.row.endSerialTaka) || 0;
+        return end - start;
+      }
+    },
+    { 
+      field: "totalFoldingMeter", 
+      headerName: "Total Folding Meter", 
+      width: 160, 
+      type: "number", 
+      align: "center", 
+      headerAlign: "center",
+      valueGetter: (params) => {
+        const start = Number(params.row.startSerialTaka) || 0;
+        const end = Number(params.row.endSerialTaka) || 0;
+        return end - start;
+      }
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -114,7 +182,7 @@ function BeamFlow() {
       ["Yarn Quality", "yarnQuality"],
       ["LOF No.", "lofNo"],
       ["Beam Length", "beamLength"],
-      ["PAN No.", "panNo"],
+      ["PANNA No.", "pannaNo"],
       ["Danier", "danier"],
       ["Total Ends", "totalEnds"],
       ["Krills", "krills"],
@@ -159,29 +227,42 @@ function BeamFlow() {
   const [form, setForm] = useState({
     beamNo: "",
     beamDate: "",
-    partyName: "",
+    partyName: "Self Product",
+    isOutsourcing: false,
     yarnQuality: "",
-    lofNo: "",
+    lotNo: "",
     beamLength: "",
-    panNo: "",
+    remainingMeter: "",
+    remainingPercentage: "",
+    daysToFinish: "",
+    pannaNo: "",
     danier: "",
     totalEnds: "",
+    pipeNumber: "",
+    startSerialTaka: "",
+    endSerialTaka: "",
     krills: "",
     section: "",
-    pipeNumber: "",
   });
 
   const openAddDialog = () => setOpenAdd(true);
   const closeAddDialog = () => setOpenAdd(false);
   const handleFormChange = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
   const handleAddSave = () => {
+    const startTaka = Number(form.startSerialTaka || 0);
+    const endTaka = Number(form.endSerialTaka || 0);
     const newRow = {
       id: Date.now(),
       status: "added",
       ...form,
+      machineNo: "", // Machine will be selected from table
       beamLength: Number(form.beamLength || 0),
       totalEnds: Number(form.totalEnds || 0),
       krills: Number(form.krills || 0),
+      startSerialTaka: startTaka,
+      endSerialTaka: endTaka,
+      totalFoldingTaka: endTaka - startTaka,
+      totalFoldingMeter: endTaka - startTaka,
     };
     setRows((prev) => [newRow, ...prev]);
     setOpenAdd(false);
@@ -204,6 +285,16 @@ function BeamFlow() {
     setTab(next);
   };
 
+  // Handle row updates for editable fields
+  const processRowUpdate = (newRow) => {
+    setRows((prev) => prev.map((r) => (r.id === newRow.id ? newRow : r)));
+    return newRow;
+  };
+
+  const handleProcessRowUpdateError = (error) => {
+    console.error("Error updating row:", error);
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -213,41 +304,72 @@ function BeamFlow() {
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <ArgonTypography variant="h4">Beam Management</ArgonTypography>
               <ArgonBox display="flex" gap={1}>
-                <ArgonButton color="primary" variant="gradient" onClick={openAddDialog}>
+                <ArgonButton 
+                  color={sidenavColor || "warning"} 
+                  variant="gradient" 
+                  onClick={openAddDialog}
+                  sx={getExportButtonStyles(theme, sidenavColor)}
+                >
                   <Icon sx={{ mr: 1 }}>add</Icon> Add Beam
                 </ArgonButton>
-                <ArgonButton color="dark" variant="outlined" onClick={exportCsv}>
+                <ArgonButton 
+                  color={sidenavColor || "warning"} 
+                  variant="gradient" 
+                  onClick={exportCsv}
+                  sx={getExportButtonStyles(theme, sidenavColor)}
+                >
                   <Icon sx={{ mr: 1 }}>file_download</Icon> Export CSV
                 </ArgonButton>
               </ArgonBox>
             </ArgonBox>
 
-            <Card>
-             <ArgonBox p={3}>
+            <Card sx={getCardStyles(darkMode)}>
+             <ArgonBox p={2.5}>
                 {/* Header controls: segmented status + search */}
                 <ArgonBox display="flex" gap={1} alignItems="center" justifyContent="space-between" flexWrap="wrap">
                   <ArgonBox display="flex" gap={1}>
                     <ArgonButton
                       size="small"
-                      color={tab === "added" ? "primary" : "secondary"}
+                      color={tab === "added" ? (sidenavColor || "warning") : "secondary"}
                       variant={tab === "added" ? "gradient" : "outlined"}
                       onClick={() => setTab("added")}
+                      sx={{
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                          transform: "scale(1.03)",
+                        },
+                      }}
                     >
                       Added
                     </ArgonButton>
                     <ArgonButton
                       size="small"
-                      color={tab === "running" ? "primary" : "secondary"}
+                      color={tab === "running" ? (sidenavColor || "warning") : "secondary"}
                       variant={tab === "running" ? "gradient" : "outlined"}
                       onClick={() => setTab("running")}
+                      sx={{
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                          transform: "scale(1.03)",
+                        },
+                      }}
                     >
                       Running
                     </ArgonButton>
                     <ArgonButton
                       size="small"
-                      color={tab === "released" ? "primary" : "secondary"}
+                      color={tab === "released" ? (sidenavColor || "warning") : "secondary"}
                       variant={tab === "released" ? "gradient" : "outlined"}
                       onClick={() => setTab("released")}
+                      sx={{
+                        borderRadius: "8px",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                          transform: "scale(1.03)",
+                        },
+                      }}
                     >
                       Released
                     </ArgonButton>
@@ -268,41 +390,66 @@ function BeamFlow() {
                   <div style={{ height: 480, width: "100%" }}>
                     {gridReady && (
                       <DataGrid
-                        density="compact"
                         rows={paginatedRows}
                         columns={columns}
-                        rowHeight={36}
-                        headerHeight={40}
+                        rowHeight={56}
+                        columnHeaderHeight={52}
                         disableColumnMenu
+                        disableRowSelectionOnClick
                         hideFooter
                         getRowId={(row) => row.id}
-                        sx={{ width: "100%" }}
+                        processRowUpdate={processRowUpdate}
+                        onProcessRowUpdateError={handleProcessRowUpdateError}
+                        sx={getTableStyles(theme, darkMode, sidenavColor)}
                       />
                     )}
                   </div>
-                  {/* Custom pagination controls */}
-                  <ArgonBox mt={1} display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
-                    <ArgonButton
-                      size="small"
-                      variant="outlined"
-                      color="secondary"
-                      disabled={page === 0}
-                      onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    >
-                      Previous
-                    </ArgonButton>
+                  <ArgonBox 
+                    mt={2.5} 
+                    pt={2.5}
+                    borderTop={darkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e9ecef"}
+                    display="flex" 
+                    alignItems="center" 
+                    justifyContent="space-between"
+                    flexWrap="wrap"
+                    gap={2}
+                  >
                     <ArgonTypography variant="caption" color="text">
-                      Page {page + 1} of {totalPages}
+                      Showing {paginatedRows.length} of {filteredRows.length} beams
                     </ArgonTypography>
-                    <ArgonButton
-                      size="small"
-                      variant="outlined"
-                      color="secondary"
-                      disabled={page >= totalPages - 1}
-                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                    >
-                      Next
-                    </ArgonButton>
+                    <ArgonBox display="flex" alignItems="center" gap={1}>
+                      <ArgonButton
+                        size="small"
+                        variant={darkMode ? "outlined" : "gradient"}
+                        color={sidenavColor || "warning"}
+                        disabled={page === 0}
+                        onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
+                      >
+                        <Icon fontSize="small">chevron_left</Icon>
+                      </ArgonButton>
+                      <ArgonTypography 
+                        variant="button" 
+                        color="text" 
+                        px={2}
+                        sx={{
+                          fontWeight: 600,
+                          color: darkMode ? "#fff" : "inherit",
+                        }}
+                      >
+                        {page + 1} / {totalPages}
+                      </ArgonTypography>
+                      <ArgonButton
+                        size="small"
+                        variant={darkMode ? "outlined" : "gradient"}
+                        color={sidenavColor || "warning"}
+                        disabled={page >= totalPages - 1}
+                        onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                        sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
+                      >
+                        <Icon fontSize="small">chevron_right</Icon>
+                      </ArgonButton>
+                    </ArgonBox>
                   </ArgonBox>
                 </ArgonBox>
               </ArgonBox>
@@ -312,65 +459,197 @@ function BeamFlow() {
       </ArgonBox>
 
       {/* Add Beam Modal */}
-      <Dialog open={openAdd} onClose={closeAddDialog} maxWidth="md" fullWidth>
+      <Dialog 
+        open={openAdd} 
+        onClose={closeAddDialog} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "12px" }
+        }}
+      >
         <DialogTitle>
-          <ArgonTypography variant="h5">Add Beam</ArgonTypography>
+          <ArgonTypography variant="h5" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Add Beam
+          </ArgonTypography>
         </DialogTitle>
         <DialogContent>
           <ArgonBox>
-            <ArgonTypography variant="subtitle2" color="text">Beam Details</ArgonTypography>
-            <Divider sx={{ my: 1 }} />
+            <ArgonTypography variant="subtitle2" sx={{ color: darkMode ? "#fff" : "text.main" }}>
+              Beam Details
+            </ArgonTypography>
+            <Divider sx={{ my: 1, borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)" }} />
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Beam No.</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Beam No.
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth placeholder="e.g., BM-004" value={form.beamNo} onChange={handleFormChange("beamNo")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Beam Date</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Beam Date
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth type="date" value={form.beamDate} onChange={handleFormChange("beamDate")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Party Name</ArgonTypography>
-                <ArgonInput fullWidth placeholder="e.g., Alpha Textiles Pvt Ltd" value={form.partyName} onChange={handleFormChange("partyName")} />
+                <ArgonBox mb={1}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox 
+                        checked={form.isOutsourcing} 
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setForm(prev => ({ 
+                            ...prev, 
+                            isOutsourcing: checked,
+                            partyName: checked ? "" : "Self Product"
+                          }));
+                        }}
+                        sx={{ color: darkMode ? "#fff" : "inherit" }}
+                      />
+                    }
+                    label={
+                      <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                        Outsourcing
+                      </ArgonTypography>
+                    }
+                  />
+                </ArgonBox>
+                {form.isOutsourcing && (
+                  <ArgonInput 
+                    fullWidth 
+                    placeholder="e.g., Alpha Textiles Pvt Ltd" 
+                    value={form.partyName} 
+                    onChange={handleFormChange("partyName")} 
+                  />
+                )}
+                {!form.isOutsourcing && (
+                  <ArgonInput 
+                    fullWidth 
+                    value="Self Product" 
+                    disabled
+                  />
+                )}
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Yarn Quality</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Yarn Quality
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth placeholder="e.g., SuperSoft 30D" value={form.yarnQuality} onChange={handleFormChange("yarnQuality")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">LOF No.</ArgonTypography>
-                <ArgonInput fullWidth placeholder="e.g., LOF-1003" value={form.lofNo} onChange={handleFormChange("lofNo")} />
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    LOT No.
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth placeholder="e.g., LOT-1003" value={form.lotNo} onChange={handleFormChange("lotNo")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Beam Length</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Beam Length
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth type="number" placeholder="e.g., 1200" value={form.beamLength} onChange={handleFormChange("beamLength")} />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Remaining Meter
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth type="number" placeholder="e.g., 1150" value={form.remainingMeter} onChange={handleFormChange("remainingMeter")} />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Remaining Percentage
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth placeholder="e.g., 95.8%" value={form.remainingPercentage} onChange={handleFormChange("remainingPercentage")} />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Days To Finish
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth type="number" placeholder="e.g., 3" value={form.daysToFinish} onChange={handleFormChange("daysToFinish")} />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">PAN No.</ArgonTypography>
-                <ArgonInput fullWidth placeholder="e.g., PAN-ALP-004" value={form.panNo} onChange={handleFormChange("panNo")} />
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    PANNO
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth placeholder="e.g., PANNA-ALP-004" value={form.pannaNo} onChange={handleFormChange("pannaNo")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Danier</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Danier
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth placeholder="e.g., 30D" value={form.danier} onChange={handleFormChange("danier")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Total Ends</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Total Ends
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth type="number" placeholder="e.g., 5000" value={form.totalEnds} onChange={handleFormChange("totalEnds")} />
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Krills</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Krills
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth type="number" placeholder="e.g., 12" value={form.krills} onChange={handleFormChange("krills")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Section</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Section
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth placeholder="e.g., A" value={form.section} onChange={handleFormChange("section")} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <ArgonTypography variant="caption" color="text">Pipe Number</ArgonTypography>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Pipe Number
+                  </ArgonTypography>
+                </ArgonBox>
                 <ArgonInput fullWidth placeholder="e.g., P-12" value={form.pipeNumber} onChange={handleFormChange("pipeNumber")} />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Start Serial Taka
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth type="number" placeholder="e.g., 1500" value={form.startSerialTaka} onChange={handleFormChange("startSerialTaka")} />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    End Serial Taka
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth type="number" placeholder="e.g., 2000" value={form.endSerialTaka} onChange={handleFormChange("endSerialTaka")} />
               </Grid>
             </Grid>
           </ArgonBox>
@@ -453,7 +732,7 @@ function BeamFlow() {
                 <Table size="small">
                   <TableBody>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 600, border: 0 }} align="left">PAN No.</TableCell>
+                      <TableCell sx={{ fontWeight: 600, border: 0 }} align="left">PANNA No.</TableCell>
                       <TableCell sx={{ border: 0 }} align="left">{detailsRow.panNo}</TableCell>
                     </TableRow>
                     <TableRow>

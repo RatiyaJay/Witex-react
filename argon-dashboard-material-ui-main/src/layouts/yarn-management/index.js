@@ -16,6 +16,7 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
+import { useTheme } from "@mui/material/styles";
 
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
@@ -26,8 +27,19 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import { firmsData } from "../manage-firm/data";
 import { yarnData as initialYarnData } from "./data";
+import { useArgonController } from "context";
+import { 
+  getTableStyles, 
+  getActionButtonStyles, 
+  getCardStyles, 
+  getPaginationButtonStyles, 
+  getExportButtonStyles 
+} from "utils/tableStyles";
 
 function YarnManagement() {
+  const [controller] = useArgonController();
+  const { darkMode, sidenavColor } = controller;
+  const theme = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [selectedFirmId, setSelectedFirmId] = useState(() => {
@@ -232,26 +244,66 @@ function YarnManagement() {
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <ArgonTypography variant="h4">Yarn Management</ArgonTypography>
               <ArgonBox display="flex" gap={1}>
-                <ArgonButton color="primary" variant="gradient" onClick={openAddDialog}>
+                <ArgonButton 
+                  color={sidenavColor || "warning"} 
+                  variant="gradient" 
+                  onClick={openAddDialog}
+                  sx={getExportButtonStyles(theme, sidenavColor)}
+                >
                   <Icon sx={{ mr: 1 }}>add</Icon> Add Yarn
                 </ArgonButton>
-                <ArgonButton color="dark" variant="outlined" onClick={exportCsv}>
+                <ArgonButton 
+                  color={sidenavColor || "warning"} 
+                  variant="gradient" 
+                  onClick={exportCsv}
+                  sx={getExportButtonStyles(theme, sidenavColor)}
+                >
                   <Icon sx={{ mr: 1 }}>file_download</Icon> Export CSV
                 </ArgonButton>
               </ArgonBox>
             </ArgonBox>
 
-            <Card>
-              <ArgonBox p={3}>
-                <Grid container spacing={2} alignItems="center" mb={1}>
+            <Card sx={getCardStyles(darkMode)}>
+              <ArgonBox p={2.5}>
+                <Grid container spacing={2} alignItems="center" mb={2}>
                   <Grid item xs={12} md={6}>
+                    <ArgonBox mb={1}>
+                      <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                        Select Company
+                      </ArgonTypography>
+                    </ArgonBox>
                     <Autocomplete
                       options={firmsOptions}
                       value={firmsOptions.find((o) => o.id === selectedFirmId) || null}
                       onChange={handleFirmChange}
                       renderInput={(params) => (
-                        <TextField {...params} label="Select Company" size="small" />
+                        <TextField 
+                          {...params} 
+                          size="small"
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: darkMode ? "rgba(255,255,255,0.05)" : "#fff",
+                              "& fieldset": {
+                                borderColor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.23)",
+                              },
+                              "&:hover fieldset": {
+                                borderColor: theme.palette.gradients[sidenavColor]?.main || theme.palette.warning.main,
+                              },
+                              "& input": {
+                                color: darkMode ? "#fff" : "inherit",
+                              },
+                            },
+                          }}
+                        />
                       )}
+                      sx={{
+                        "& .MuiAutocomplete-popupIndicator": {
+                          color: darkMode ? "#fff" : "inherit",
+                        },
+                        "& .MuiAutocomplete-clearIndicator": {
+                          color: darkMode ? "#fff" : "inherit",
+                        },
+                      }}
                     />
                   </Grid>
                 </Grid>
@@ -259,40 +311,64 @@ function YarnManagement() {
                 <div style={{ height: 480, width: "100%" }}>
                   {gridReady && (
                     <DataGrid
-                      density="compact"
                       rows={paginatedRows}
                       columns={columns}
-                      rowHeight={36}
-                      headerHeight={40}
+                      rowHeight={56}
+                      columnHeaderHeight={52}
                       disableColumnMenu
+                      disableRowSelectionOnClick
                       hideFooter
                       getRowId={(row) => row.id}
-                      sx={{ width: "100%" }}
+                      sx={getTableStyles(theme, darkMode, sidenavColor)}
                     />
                   )}
                 </div>
-                <ArgonBox mt={1} display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
-                  <ArgonButton
-                    size="small"
-                    variant="outlined"
-                    color="secondary"
-                    disabled={page === 0}
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  >
-                    Previous
-                  </ArgonButton>
+                <ArgonBox 
+                  mt={2.5} 
+                  pt={2.5}
+                  borderTop={darkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e9ecef"}
+                  display="flex" 
+                  alignItems="center" 
+                  justifyContent="space-between"
+                  flexWrap="wrap"
+                  gap={2}
+                >
                   <ArgonTypography variant="caption" color="text">
-                    Page {page + 1} of {totalPages}
+                    Showing {paginatedRows.length} of {filteredRows.length} yarns
                   </ArgonTypography>
-                  <ArgonButton
-                    size="small"
-                    variant="outlined"
-                    color="secondary"
-                    disabled={page >= totalPages - 1}
-                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                  >
-                    Next
-                  </ArgonButton>
+                  <ArgonBox display="flex" alignItems="center" gap={1}>
+                    <ArgonButton
+                      size="small"
+                      variant={darkMode ? "outlined" : "gradient"}
+                      color={sidenavColor || "warning"}
+                      disabled={page === 0}
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
+                    >
+                      <Icon fontSize="small">chevron_left</Icon>
+                    </ArgonButton>
+                    <ArgonTypography 
+                      variant="button" 
+                      color="text" 
+                      px={2}
+                      sx={{
+                        fontWeight: 600,
+                        color: darkMode ? "#fff" : "inherit",
+                      }}
+                    >
+                      {page + 1} / {totalPages}
+                    </ArgonTypography>
+                    <ArgonButton
+                      size="small"
+                      variant={darkMode ? "outlined" : "gradient"}
+                      color={sidenavColor || "warning"}
+                      disabled={page >= totalPages - 1}
+                      onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                      sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
+                    >
+                      <Icon fontSize="small">chevron_right</Icon>
+                    </ArgonButton>
+                  </ArgonBox>
                 </ArgonBox>
               </ArgonBox>
             </Card>

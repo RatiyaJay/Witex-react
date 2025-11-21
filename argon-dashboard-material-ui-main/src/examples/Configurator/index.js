@@ -13,19 +13,11 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
 
-// react-github-btn
-import GitHubButton from "react-github-btn";
-
 // @mui material components
 import Divider from "@mui/material/Divider";
 import Switch from "@mui/material/Switch";
 import IconButton from "@mui/material/IconButton";
-import Link from "@mui/material/Link";
 import Icon from "@mui/material/Icon";
-
-// @mui icons
-import TwitterIcon from "@mui/icons-material/Twitter";
-import FacebookIcon from "@mui/icons-material/Facebook";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
@@ -50,7 +42,7 @@ function Configurator() {
   const [controller, dispatch] = useArgonController();
   const { openConfigurator, darkSidenav, miniSidenav, fixedNavbar, sidenavColor, darkMode } =
     controller;
-  const sidenavColors = ["primary", "dark", "info", "success", "warning", "error"];
+  const sidenavColors = ["warning", "primary", "dark", "info", "success", "error"];
 
   const handleCloseConfigurator = () => setOpenConfigurator(dispatch, false);
   const handledarkSidenav = () => setDarkSidenav(dispatch, true);
@@ -73,8 +65,10 @@ function Configurator() {
         px={3}
       >
         <ArgonBox>
-          <ArgonTypography variant="h5">Argon Configurator</ArgonTypography>
-          <ArgonTypography variant="body2" color="text">
+          <ArgonTypography variant="h5" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Argon Configurator
+          </ArgonTypography>
+          <ArgonTypography variant="body2" sx={{ color: darkMode ? "rgba(255,255,255,0.7)" : "text.main" }}>
             See our dashboard options.
           </ArgonTypography>
         </ArgonBox>
@@ -95,11 +89,13 @@ function Configurator() {
         </Icon>
       </ArgonBox>
 
-      <Divider />
+      <Divider sx={{ borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)" }} />
 
       <ArgonBox pt={1.25} pb={3} px={3}>
         <ArgonBox>
-          <ArgonTypography variant="h6">Sidenav Colors</ArgonTypography>
+          <ArgonTypography variant="h6" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Sidenav Colors
+          </ArgonTypography>
 
           <ArgonBox mb={0.5}>
             {sidenavColors.map((color) => (
@@ -133,8 +129,10 @@ function Configurator() {
         </ArgonBox>
 
         <ArgonBox mt={3} lineHeight={1}>
-          <ArgonTypography variant="h6">Sidenav Type</ArgonTypography>
-          <ArgonTypography variant="button" color="text" fontWeight="regular">
+          <ArgonTypography variant="h6" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Sidenav Type
+          </ArgonTypography>
+          <ArgonTypography variant="button" fontWeight="regular" sx={{ color: darkMode ? "rgba(255,255,255,0.7)" : "text.main" }}>
             Choose between 2 different sidenav types.
           </ArgonTypography>
 
@@ -166,105 +164,34 @@ function Configurator() {
           </ArgonBox>
         </ArgonBox>
         <ArgonBox display="flex" justifyContent="space-between" mt={3} lineHeight={1}>
-          <ArgonTypography variant="h6">Navbar Fixed</ArgonTypography>
+          <ArgonTypography variant="h6" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Navbar Fixed
+          </ArgonTypography>
 
           <Switch checked={fixedNavbar} onChange={handleFixedNavbar} />
         </ArgonBox>
 
-        <Divider />
+        <Divider sx={{ borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)" }} />
 
         <ArgonBox display="flex" justifyContent="space-between" lineHeight={1}>
-          <ArgonTypography variant="h6">Sidenav Mini</ArgonTypography>
+          <ArgonTypography variant="h6" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Sidenav Mini
+          </ArgonTypography>
 
           <Switch checked={miniSidenav} onChange={handleMiniSidenav} />
         </ArgonBox>
 
-        <Divider />
+        <Divider sx={{ borderColor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.12)" }} />
 
         <ArgonBox display="flex" justifyContent="space-between" lineHeight={1}>
-          <ArgonTypography variant="h6">Light / Dark</ArgonTypography>
+          <ArgonTypography variant="h6" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Light / Dark
+          </ArgonTypography>
 
           <Switch checked={darkMode} onChange={handleDarkMode} />
         </ArgonBox>
 
-        <ArgonBox mt={5} mb={2}>
-          <ArgonBox mb={2}>
-            <ArgonButton
-              component={Link}
-              href="https://www.creative-tim.com/product/argon-dashboard-pro-material-ui"
-              target="_blank"
-              rel="noreferrer"
-              color="info"
-              fullWidth
-            >
-              Buy Now
-            </ArgonButton>
-          </ArgonBox>
-          <ArgonBox mb={2}>
-            <ArgonButton
-              component={Link}
-              href="https://www.creative-tim.com/product/argon-dashboard-material-ui"
-              target="_blank"
-              rel="noreferrer"
-              color="dark"
-              fullWidth
-            >
-              Free Download
-            </ArgonButton>
-          </ArgonBox>
-          <ArgonButton
-            component={Link}
-            href="https://www.creative-tim.com/learning-lab/react/quick-start/argon-dashboard/"
-            target="_blank"
-            rel="noreferrer"
-            color={darkMode ? "white" : "dark"}
-            variant="outlined"
-            fullWidth
-          >
-            View Documentation
-          </ArgonButton>
-        </ArgonBox>
-        <ArgonBox display="flex" justifyContent="center">
-          <GitHubButton
-            href="https://github.com/creativetimofficial/argon-dashboard-material-ui"
-            data-icon="octicon-star"
-            data-size="large"
-            data-show-count="true"
-            aria-label="Star creativetimofficial/argon-dashboard-material-uit on GitHub"
-          >
-            Star
-          </GitHubButton>
-        </ArgonBox>
-        <ArgonBox mt={3} textAlign="center">
-          <ArgonBox mb={0.5}>
-            <ArgonTypography variant="h6">Thank you for sharing!</ArgonTypography>
-          </ArgonBox>
 
-          <ArgonBox display="flex" justifyContent="center">
-            <ArgonBox mr={1.5}>
-              <ArgonButton
-                component={Link}
-                href="//twitter.com/intent/tweet?text=Check%20Argon%20Dashboard%202%20PRO%20MUI%20made%20by%20%40CreativeTim%20%23webdesign%20%23dashboard%20%23react%20%mui&url=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fargon-dashboard-material-ui"
-                target="_blank"
-                rel="noreferrer"
-                color="dark"
-              >
-                <TwitterIcon />
-                &nbsp; Tweet
-              </ArgonButton>
-            </ArgonBox>
-            <ArgonButton
-              component={Link}
-              href="https://www.facebook.com/sharer/sharer.php?u=https://www.creative-tim.com/product/argon-dashboard-material-ui"
-              target="_blank"
-              rel="noreferrer"
-              color="dark"
-            >
-              <FacebookIcon />
-              &nbsp; Share
-            </ArgonButton>
-          </ArgonBox>
-        </ArgonBox>
       </ArgonBox>
     </ConfiguratorRoot>
   );

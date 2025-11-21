@@ -17,6 +17,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import { useTheme } from "@mui/material/styles";
 
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
@@ -28,10 +29,23 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 
 import { machinesData } from "./data";
+import { beamsData } from "../beam-flow/data";
+import { useArgonController } from "context";
+import { 
+  getTableStyles, 
+  getActionButtonStyles, 
+  getCardStyles, 
+  getPaginationButtonStyles, 
+  getExportButtonStyles 
+} from "utils/tableStyles";
 
 const initialMachines = machinesData;
 
 function MachineManagement() {
+  const [controller] = useArgonController();
+  const { darkMode, sidenavColor } = controller;
+  const theme = useTheme();
+  
   const [rows, setRows] = useState(initialMachines);
   const [page, setPage] = useState(0);
   const pageSize = 10;
@@ -71,6 +85,7 @@ function MachineManagement() {
     motorKw: "5.5",
     minCurrent: "", // (ne)
     maxCurrent: "", // (ne)
+    causeOfError: "None",
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -91,6 +106,7 @@ function MachineManagement() {
   const dobbyOptions = ["hobby", "loom", "plain", "jacquard"];
   const motorKwOptions = ["3.7", "5.5", "7.5", "11", "15"];
   const shiftOptions = ["Day", "Night"];
+  const causeOfErrorOptions = ["None", "Mechanical", "Electrical", "Weft Yarn"];
 
   const columns = [
     { 
@@ -154,6 +170,28 @@ function MachineManagement() {
       align: "center"
     },
     { 
+      field: "beamNo", 
+      headerName: "Beam No.", 
+      width: 110,
+      headerAlign: "center",
+      align: "center",
+      valueGetter: (params) => {
+        const beam = beamsData.find(b => b.machineNo === params.row.machineNumber && b.status === "running");
+        return beam ? beam.beamNo : "-";
+      }
+    },
+    { 
+      field: "remainingBeam", 
+      headerName: "Remaining Beam", 
+      width: 130,
+      headerAlign: "center",
+      align: "center",
+      valueGetter: (params) => {
+        const beam = beamsData.find(b => b.machineNo === params.row.machineNumber && b.status === "running");
+        return beam ? beam.beamLength : "-";
+      }
+    },
+    { 
       field: "dobbyType", 
       headerName: "Dobby", 
       width: 100,
@@ -174,6 +212,13 @@ function MachineManagement() {
       headerAlign: "center",
       align: "center"
     },
+    { 
+      field: "causeOfError", 
+      headerName: "Cause of Error", 
+      width: 130,
+      headerAlign: "center",
+      align: "center"
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -190,12 +235,12 @@ function MachineManagement() {
             color="info" 
             onClick={() => handleShowDetails(params.row)}
             sx={{
-              borderRadius: "8px",
+              borderRadius: "10px",
               transition: "all 0.2s ease-in-out",
               "&:hover": {
-                transform: "scale(1.08)",
-                backgroundColor: "rgba(33, 150, 243, 0.12)",
-                boxShadow: "0 2px 8px rgba(33, 150, 243, 0.3)",
+                transform: "scale(1.1)",
+                backgroundColor: darkMode ? "rgba(33, 150, 243, 0.2)" : "rgba(33, 150, 243, 0.12)",
+                boxShadow: "0 4px 12px rgba(33, 150, 243, 0.4)",
               },
             }}
           >
@@ -204,15 +249,17 @@ function MachineManagement() {
           <IconButton 
             title="Edit" 
             size="small" 
-            color="primary" 
             onClick={() => handleEdit(params.row)}
             sx={{
-              borderRadius: "8px",
+              borderRadius: "10px",
               transition: "all 0.2s ease-in-out",
+              color: theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main,
               "&:hover": {
-                transform: "scale(1.08)",
-                backgroundColor: "rgba(76, 175, 80, 0.12)",
-                boxShadow: "0 2px 8px rgba(76, 175, 80, 0.3)",
+                transform: "scale(1.1)",
+                backgroundColor: darkMode 
+                  ? `${theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main}30`
+                  : `${theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main}20`,
+                boxShadow: `0 4px 12px ${theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main}50`,
               },
             }}
           >
@@ -224,12 +271,12 @@ function MachineManagement() {
             color="error" 
             onClick={() => handleDeleteClick(params.row)}
             sx={{
-              borderRadius: "8px",
+              borderRadius: "10px",
               transition: "all 0.2s ease-in-out",
               "&:hover": {
-                transform: "scale(1.08)",
-                backgroundColor: "rgba(244, 67, 54, 0.12)",
-                boxShadow: "0 2px 8px rgba(244, 67, 54, 0.3)",
+                transform: "scale(1.1)",
+                backgroundColor: darkMode ? "rgba(244, 67, 54, 0.2)" : "rgba(244, 67, 54, 0.12)",
+                boxShadow: "0 4px 12px rgba(244, 67, 54, 0.4)",
               },
             }}
           >
@@ -287,6 +334,7 @@ function MachineManagement() {
       motorKw: "5.5",
       minCurrent: "",
       maxCurrent: "",
+      causeOfError: "None",
     });
     setOpenForm(true);
   };
@@ -396,23 +444,16 @@ function MachineManagement() {
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <ArgonTypography variant="h4">Machine Management</ArgonTypography>
               <ArgonButton 
-                color="dark" 
-                variant="outlined" 
+                color={sidenavColor || "warning"}
+                variant="gradient" 
                 onClick={exportCsv}
-                sx={{
-                  borderRadius: "8px",
-                  transition: "all 0.2s ease-in-out",
-                  "&:hover": {
-                    transform: "scale(1.03)",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                  },
-                }}
+                sx={getExportButtonStyles(theme, sidenavColor)}
               >
                 <Icon sx={{ mr: 1 }}>file_download</Icon> Export CSV
               </ArgonButton>
             </ArgonBox>
-            <Card sx={{ overflow: "hidden", borderRadius: "12px" }}>
-              <ArgonBox p={2}>
+            <Card sx={getCardStyles(darkMode)}>
+              <ArgonBox p={2.5}>
                 <div style={{ height: 480, width: "100%" }}>
                   <DataGrid
                     rows={paginatedRows}
@@ -421,29 +462,15 @@ function MachineManagement() {
                     disableRowSelectionOnClick
                     hideFooter
                     getRowId={(row) => row.id}
-                    rowHeight={52}
-                    columnHeaderHeight={48}
-                    sx={{
-                      border: "none",
-                      "& .MuiDataGrid-cell": {
-                        borderBottom: "1px solid #f0f2f5",
-                      },
-                      "& .MuiDataGrid-columnHeaders": {
-                        backgroundColor: "#f8f9fa",
-                        borderBottom: "2px solid #e9ecef",
-                        fontSize: "0.875rem",
-                        fontWeight: 600,
-                      },
-                      "& .MuiDataGrid-row:hover": {
-                        backgroundColor: "#f8f9fa",
-                      },
-                    }}
+                    rowHeight={56}
+                    columnHeaderHeight={52}
+                    sx={getTableStyles(theme, darkMode, sidenavColor)}
                   />
                 </div>
                 <ArgonBox 
-                  mt={2} 
-                  pt={2}
-                  borderTop="1px solid #e9ecef"
+                  mt={2.5} 
+                  pt={2.5}
+                  borderTop={darkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e9ecef"}
                   display="flex" 
                   alignItems="center" 
                   justifyContent="space-between"
@@ -456,38 +483,32 @@ function MachineManagement() {
                   <ArgonBox display="flex" alignItems="center" gap={1}>
                     <ArgonButton
                       size="small"
-                      variant="outlined"
-                      color="secondary"
+                      variant={darkMode ? "outlined" : "gradient"}
+                      color={sidenavColor || "warning"}
                       disabled={page === 0}
                       onClick={() => setPage((p) => Math.max(0, p - 1))}
-                      sx={{
-                        borderRadius: "8px",
-                        transition: "all 0.2s ease-in-out",
-                        "&:hover:not(:disabled)": {
-                          transform: "scale(1.05)",
-                          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
-                        },
-                      }}
+                      sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
                     >
                       <Icon fontSize="small">chevron_left</Icon>
                     </ArgonButton>
-                    <ArgonTypography variant="button" color="text" px={2}>
+                    <ArgonTypography 
+                      variant="button" 
+                      color="text" 
+                      px={2}
+                      sx={{
+                        fontWeight: 600,
+                        color: darkMode ? "#fff" : "inherit",
+                      }}
+                    >
                       {page + 1} / {totalPages}
                     </ArgonTypography>
                     <ArgonButton
                       size="small"
-                      variant="outlined"
-                      color="secondary"
+                      variant={darkMode ? "outlined" : "gradient"}
+                      color={sidenavColor || "warning"}
                       disabled={page >= totalPages - 1}
                       onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                      sx={{
-                        borderRadius: "8px",
-                        transition: "all 0.2s ease-in-out",
-                        "&:hover:not(:disabled)": {
-                          transform: "scale(1.05)",
-                          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
-                        },
-                      }}
+                      sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
                     >
                       <Icon fontSize="small">chevron_right</Icon>
                     </ArgonButton>
@@ -848,6 +869,25 @@ function MachineManagement() {
                   sx={{ height: "42px" }}
                 >
                   {motorKwOptions.map((o) => (
+                    <MenuItem key={o} value={o}>{o}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Cause of Error
+                </ArgonTypography>
+              </ArgonBox>
+              <FormControl fullWidth>
+                <Select 
+                  value={form.causeOfError || "None"} 
+                  onChange={(e) => handleFormChange("causeOfError", e.target.value)}
+                  displayEmpty
+                  sx={{ height: "42px" }}
+                >
+                  {causeOfErrorOptions.map((o) => (
                     <MenuItem key={o} value={o}>{o}</MenuItem>
                   ))}
                 </Select>

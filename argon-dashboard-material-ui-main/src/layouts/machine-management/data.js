@@ -30,6 +30,7 @@ export const machinesData = [
     motorKw: "5.5",
     minCurrent: 9.8,
     maxCurrent: 14.2,
+    causeOfError: "None",
   },
   {
     id: 2,
@@ -62,6 +63,7 @@ export const machinesData = [
     motorKw: "7.5",
     minCurrent: 8.9,
     maxCurrent: 12.1,
+    causeOfError: "Electrical",
   },
   {
     id: 3,
@@ -94,6 +96,7 @@ export const machinesData = [
     motorKw: "5.5",
     minCurrent: 10.2,
     maxCurrent: 13.5,
+    causeOfError: "Weft Yarn",
   },
   {
     id: 4,
@@ -126,6 +129,7 @@ export const machinesData = [
     motorKw: "3.7",
     minCurrent: 7.8,
     maxCurrent: 11.2,
+    causeOfError: "Mechanical",
   },
   {
     id: 5,
@@ -158,6 +162,7 @@ export const machinesData = [
     motorKw: "7.5",
     minCurrent: 11.5,
     maxCurrent: 15.0,
+    causeOfError: "Electrical",
   },
   {
     id: 6,
@@ -190,5 +195,6 @@ export const machinesData = [
     motorKw: "5.5",
     minCurrent: 10.0,
     maxCurrent: 13.8,
+    causeOfError: "Weft Yarn",
   },
 ];
