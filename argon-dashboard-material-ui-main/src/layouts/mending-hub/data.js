@@ -1,0 +1,72 @@
+export const productionEntryData = [
+  {
+    id: 1,
+    pageNo: 1,
+    dateTime: "2025-02-10 09:30",
+    qualityName: "SuperSoft 30D",
+    takaNo: 1,
+    totalTaka: 150,
+    meter: 12,
+    totalMeter: 12,
+    machineNo: "MC001",
+    tp: "TP-A1",
+  },
+  {
+    id: 2,
+    pageNo: 1,
+    dateTime: "2025-02-10 10:15",
+    qualityName: "SuperSoft 30D",
+    takaNo: 2,
+    totalTaka: 300,
+    meter: 15,
+    totalMeter: 27,
+    machineNo: "MC002",
+    tp: "TP-A2",
+  },
+  {
+    id: 3,
+    pageNo: 2,
+    dateTime: "2025-02-11 08:45",
+    qualityName: "PrimeWeft 25D",
+    takaNo: 1,
+    totalTaka: 120,
+    meter: 10,
+    totalMeter: 10,
+    machineNo: "MC003",
+    tp: "TP-B1",
+  },
+];
+
+export const stockManagementData = [
+  {
+    id: 1,
+    qualityName: "SuperSoft 30D",
+    oldTaka: 500,
+    oldMeter: 40,
+    newTaka: 300,
+    newMeter: 27,
+    deliveredTaka: 200,
+    deliveredMeter: 15,
+    totalTaka: 600,
+    totalMeter: 52,
+  },
+  {
+    id: 2,
+    qualityName: "PrimeWeft 25D",
+    oldTaka: 400,
+    oldMeter: 35,
+    newTaka: 120,
+    newMeter: 10,
+    deliveredTaka: 150,
+    deliveredMeter: 12,
+    totalTaka: 370,
+    totalMeter: 33,
+  },
+];
+
+export const qualityListData = [
+  { id: 1, qualityName: "SuperSoft 30D" },
+  { id: 2, qualityName: "PrimeWeft 25D" },
+  { id: 3, qualityName: "ComfortWeave 40D" },
+  { id: 4, qualityName: "UltraWeave 35D" },
+];

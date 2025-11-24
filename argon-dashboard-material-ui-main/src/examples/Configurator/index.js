@@ -66,7 +66,7 @@ function Configurator() {
       >
         <ArgonBox>
           <ArgonTypography variant="h5" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-            Argon Configurator
+            Technotech Configurator
           </ArgonTypography>
           <ArgonTypography variant="body2" sx={{ color: darkMode ? "rgba(255,255,255,0.7)" : "text.main" }}>
             See our dashboard options.

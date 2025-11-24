@@ -181,15 +181,62 @@ function MachineManagement() {
       }
     },
     { 
-      field: "remainingBeam", 
-      headerName: "Remaining Beam", 
-      width: 130,
+      field: "partyName", 
+      headerName: "Party Name", 
+      width: 150,
+      headerAlign: "center",
+      align: "center",
+      valueGetter: (params) => {
+        const beam = beamsData.find(b => b.machineNo === params.row.machineNumber && b.status === "running");
+        return beam ? beam.partyName : "-";
+      }
+    },
+    { 
+      field: "beamLength", 
+      headerName: "Beam Length", 
+      width: 120,
       headerAlign: "center",
       align: "center",
       valueGetter: (params) => {
         const beam = beamsData.find(b => b.machineNo === params.row.machineNumber && b.status === "running");
         return beam ? beam.beamLength : "-";
       }
+    },
+    { 
+      field: "pipeNumber", 
+      headerName: "Pipe Number", 
+      width: 120,
+      headerAlign: "center",
+      align: "center",
+      valueGetter: (params) => {
+        const beam = beamsData.find(b => b.machineNo === params.row.machineNumber && b.status === "running");
+        return beam ? beam.pipeNumber : "-";
+      }
+    },
+    { 
+      field: "krills", 
+      headerName: "Krills", 
+      width: 90,
+      headerAlign: "center",
+      align: "center",
+      valueGetter: (params) => {
+        const beam = beamsData.find(b => b.machineNo === params.row.machineNumber && b.status === "running");
+        return beam ? beam.krills : "-";
+      }
+    },
+    { 
+      field: "minCurrent", 
+      headerName: "Min Current", 
+      width: 110,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "maxCurrent", 
+      headerName: "Max Current", 
+      width: 110,
+      headerAlign: "center",
+      align: "center"
     },
     { 
       field: "dobbyType", 
@@ -698,7 +745,7 @@ function MachineManagement() {
             <Grid item xs={12} sm={4}>
               <ArgonBox mb={1}>
                 <ArgonTypography variant="caption" fontWeight="bold" color="text">
-                  RPM
+                  RPM (Auto)
                 </ArgonTypography>
               </ArgonBox>
               <ArgonInput 
@@ -706,6 +753,7 @@ function MachineManagement() {
                 value={form.rpm} 
                 onChange={(e) => handleFormChange("rpm", e.target.value)} 
                 placeholder="180" 
+                disabled
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -735,7 +783,7 @@ function MachineManagement() {
             <Grid item xs={12} sm={4}>
               <ArgonBox mb={1}>
                 <ArgonTypography variant="caption" fontWeight="bold" color="text">
-                  Pick
+                  Pick (Auto)
                 </ArgonTypography>
               </ArgonBox>
               <ArgonInput 
@@ -743,6 +791,7 @@ function MachineManagement() {
                 value={form.pick} 
                 onChange={(e) => handleFormChange("pick", e.target.value)} 
                 placeholder="28" 
+                disabled
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -856,7 +905,7 @@ function MachineManagement() {
                 placeholder="420.5" 
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <ArgonBox mb={1}>
                 <ArgonTypography variant="caption" fontWeight="bold" color="text">
                   Motor (kW)
@@ -873,6 +922,32 @@ function MachineManagement() {
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Min Current
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.minCurrent} 
+                onChange={(e) => handleFormChange("minCurrent", e.target.value)} 
+                placeholder="9.8" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Max Current
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number" 
+                value={form.maxCurrent} 
+                onChange={(e) => handleFormChange("maxCurrent", e.target.value)} 
+                placeholder="14.2" 
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <ArgonBox mb={1}>

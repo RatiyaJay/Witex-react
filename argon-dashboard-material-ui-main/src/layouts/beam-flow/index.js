@@ -82,7 +82,7 @@ function BeamFlow() {
     return filteredRows.slice(start, start + pageSize);
   }, [filteredRows, page, totalPages]);
 
-  const columns = [
+  const allColumns = [
     { field: "beamNo", headerName: "Beam No.", width: 110, align: "center", headerAlign: "center" },
     { 
       field: "machineNo", 
@@ -114,34 +114,6 @@ function BeamFlow() {
     { field: "totalEnds", headerName: "Ends", width: 100, type: "number", align: "center", headerAlign: "center" },
     { field: "pannaNo", headerName: "PANNO", width: 140, align: "center", headerAlign: "center" },
     { field: "danier", headerName: "Danier", width: 90, align: "center", headerAlign: "center" },
-    { field: "startSerialTaka", headerName: "Start Serial Taka", width: 140, type: "number", align: "center", headerAlign: "center", editable: tab === "added" },
-    { field: "endSerialTaka", headerName: "End Serial Taka", width: 140, type: "number", align: "center", headerAlign: "center", editable: tab === "added" },
-    { 
-      field: "totalFoldingTaka", 
-      headerName: "Total Folding Taka", 
-      width: 150, 
-      type: "number", 
-      align: "center", 
-      headerAlign: "center",
-      valueGetter: (params) => {
-        const start = Number(params.row.startSerialTaka) || 0;
-        const end = Number(params.row.endSerialTaka) || 0;
-        return end - start;
-      }
-    },
-    { 
-      field: "totalFoldingMeter", 
-      headerName: "Total Folding Meter", 
-      width: 160, 
-      type: "number", 
-      align: "center", 
-      headerAlign: "center",
-      valueGetter: (params) => {
-        const start = Number(params.row.startSerialTaka) || 0;
-        const end = Number(params.row.endSerialTaka) || 0;
-        return end - start;
-      }
-    },
     {
       field: "actions",
       headerName: "Actions",
@@ -173,6 +145,8 @@ function BeamFlow() {
       ),
     },
   ];
+
+  const columns = allColumns;
 
   const exportCsv = () => {
     const headers = [
@@ -239,8 +213,6 @@ function BeamFlow() {
     danier: "",
     totalEnds: "",
     pipeNumber: "",
-    startSerialTaka: "",
-    endSerialTaka: "",
     krills: "",
     section: "",
   });
@@ -249,8 +221,6 @@ function BeamFlow() {
   const closeAddDialog = () => setOpenAdd(false);
   const handleFormChange = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
   const handleAddSave = () => {
-    const startTaka = Number(form.startSerialTaka || 0);
-    const endTaka = Number(form.endSerialTaka || 0);
     const newRow = {
       id: Date.now(),
       status: "added",
@@ -259,10 +229,6 @@ function BeamFlow() {
       beamLength: Number(form.beamLength || 0),
       totalEnds: Number(form.totalEnds || 0),
       krills: Number(form.krills || 0),
-      startSerialTaka: startTaka,
-      endSerialTaka: endTaka,
-      totalFoldingTaka: endTaka - startTaka,
-      totalFoldingMeter: endTaka - startTaka,
     };
     setRows((prev) => [newRow, ...prev]);
     setOpenAdd(false);
@@ -634,22 +600,6 @@ function BeamFlow() {
                   </ArgonTypography>
                 </ArgonBox>
                 <ArgonInput fullWidth placeholder="e.g., P-12" value={form.pipeNumber} onChange={handleFormChange("pipeNumber")} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <ArgonBox mb={1}>
-                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                    Start Serial Taka
-                  </ArgonTypography>
-                </ArgonBox>
-                <ArgonInput fullWidth type="number" placeholder="e.g., 1500" value={form.startSerialTaka} onChange={handleFormChange("startSerialTaka")} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <ArgonBox mb={1}>
-                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                    End Serial Taka
-                  </ArgonTypography>
-                </ArgonBox>
-                <ArgonInput fullWidth type="number" placeholder="e.g., 2000" value={form.endSerialTaka} onChange={handleFormChange("endSerialTaka")} />
               </Grid>
             </Grid>
           </ArgonBox>

@@ -81,7 +81,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
               name={name}
               icon={icon}
               active={key === itemName}
-              noCollapse={noCollapse}
             />
           </Link>
         );
@@ -101,11 +100,16 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           variant="caption"
           fontWeight="bold"
           textTransform="uppercase"
-          opacity={0.6}
+          opacity={miniSidenav ? 0 : 0.6}
           pl={3}
           mt={2}
           mb={1}
           ml={1}
+          sx={{
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            transition: "opacity 0.3s ease",
+          }}
         >
           {title}
         </ArgonTypography>

@@ -49,10 +49,9 @@ import PerformancePulse from "layouts/performance-pulse";
 import StoppageDetails from "layouts/stoppage-details";
 import CurrentFlow from "layouts/current-flow";
 import Calculator from "layouts/calculator";
-import AttendanceSheet from "layouts/attendance-sheet";
-import Delivery from "layouts/delivery";
 import Reports from "layouts/reports";
 import ActivityLogs from "layouts/activity-logs";
+import QualityStock from "layouts/quality-stock";
 // Orderbook section
 import OrderbookFabric from "layouts/orderbook/fabric";
 import OrderbookYarn from "layouts/orderbook/yarn";
@@ -96,10 +95,9 @@ const routes = [
   { type: "route", name: "Stoppage Details", key: "stoppage-details", route: "/stoppage-details", icon: "report_problem", component: <StoppageDetails /> },
   { type: "route", name: "Current Flow", key: "current-flow", route: "/current-flow", icon: "autorenew", component: <CurrentFlow /> },
   { type: "route", name: "Calculator", key: "calculator", route: "/calculator", icon: "calculate", component: <Calculator /> },
-  { type: "route", name: "Attendance Sheet", key: "attendance-sheet", route: "/attendance-sheet", icon: "schedule", component: <AttendanceSheet /> },
-  { type: "route", name: "Delivery", key: "delivery", route: "/delivery", icon: "local_shipping", component: <Delivery /> },
   { type: "route", name: "Reports", key: "reports", route: "/reports", icon: "bar_chart", component: <Reports /> },
   { type: "route", name: "Activity Logs", key: "activity-logs", route: "/activity-logs", icon: "list_alt", component: <ActivityLogs /> },
+  { type: "route", name: "InHouse Quality Stock", key: "inhouse-quality-stock", route: "/inhouse-quality-stock", icon: "home_work", component: <QualityStock /> },
   {
     type: "collapse",
     name: "Orderbook",
