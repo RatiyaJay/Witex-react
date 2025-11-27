@@ -479,9 +479,20 @@ function YarnManagement() {
       </ArgonBox>
 
       {/* Add Yarn Modal */}
-      <Dialog open={openAdd} onClose={closeAddDialog} maxWidth="md" fullWidth>
-        <DialogTitle>
-          <ArgonTypography variant="h5">Add Yarn</ArgonTypography>
+      <Dialog 
+        open={openAdd} 
+        onClose={closeAddDialog} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background: darkMode ? "#1a2332" : "#ffffff",
+          }
+        }}
+      >
+        <DialogTitle sx={{ background: darkMode ? "#1a2332" : "#ffffff" }}>
+          <ArgonTypography variant="h5" color={darkMode ? "white" : "dark"}>Add Yarn</ArgonTypography>
         </DialogTitle>
         <DialogContent>
           <ArgonBox>
@@ -580,9 +591,20 @@ function YarnManagement() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <Dialog open={openDelete} onClose={closeDelete} maxWidth="xs" fullWidth>
-        <DialogTitle>
-          <ArgonTypography variant="h6">Delete Yarn</ArgonTypography>
+      <Dialog 
+        open={openDelete} 
+        onClose={closeDelete} 
+        maxWidth="xs" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background: darkMode ? "#1a2332" : "#ffffff",
+          }
+        }}
+      >
+        <DialogTitle sx={{ background: darkMode ? "#1a2332" : "#ffffff" }}>
+          <ArgonTypography variant="h6" color={darkMode ? "white" : "dark"}>Delete Yarn</ArgonTypography>
         </DialogTitle>
         <DialogContent>
           <ArgonTypography variant="body2" color="text">
@@ -603,19 +625,30 @@ function YarnManagement() {
       </Dialog>
 
       {/* Transfer Dialog */}
-      <Dialog open={openTransfer} onClose={() => setOpenTransfer(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <ArgonTypography variant="h5">Transfer Yarn to Departments</ArgonTypography>
+      <Dialog 
+        open={openTransfer} 
+        onClose={() => setOpenTransfer(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background: darkMode ? "#1a2332" : "#ffffff",
+          }
+        }}
+      >
+        <DialogTitle sx={{ background: darkMode ? "#1a2332" : "#ffffff" }}>
+          <ArgonTypography variant="h5" color={darkMode ? "white" : "dark"}>Transfer Yarn to Departments</ArgonTypography>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ background: darkMode ? "#1a2332" : "#ffffff" }}>
           {transferRow && (
             <ArgonBox mt={2}>
-              <ArgonTypography variant="body2" color="text" mb={2}>
+              <ArgonTypography variant="body2" color={darkMode ? "white" : "text"} mb={2}>
                 Available Cartoons: <strong>{transferRow.totalCartoon}</strong>
               </ArgonTypography>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <ArgonTypography variant="caption" fontWeight="bold">
+                  <ArgonTypography variant="caption" fontWeight="bold" color={darkMode ? "white" : "dark"}>
                     Warping
                   </ArgonTypography>
                   <ArgonInput
@@ -627,7 +660,7 @@ function YarnManagement() {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ArgonTypography variant="caption" fontWeight="bold">
+                  <ArgonTypography variant="caption" fontWeight="bold" color={darkMode ? "white" : "dark"}>
                     Twisting
                   </ArgonTypography>
                   <ArgonInput
@@ -639,7 +672,7 @@ function YarnManagement() {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <ArgonTypography variant="caption" fontWeight="bold">
+                  <ArgonTypography variant="caption" fontWeight="bold" color={darkMode ? "white" : "dark"}>
                     Weft
                   </ArgonTypography>
                   <ArgonInput
@@ -665,9 +698,20 @@ function YarnManagement() {
       </Dialog>
 
       {/* Details Modal */}
-      <Dialog open={openDetails} onClose={() => { setOpenDetails(false); setDetailsRow(null); }} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <ArgonTypography variant="h5">Yarn Details</ArgonTypography>
+      <Dialog 
+        open={openDetails} 
+        onClose={() => { setOpenDetails(false); setDetailsRow(null); }} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background: darkMode ? "#1a2332" : "#ffffff",
+          }
+        }}
+      >
+        <DialogTitle sx={{ background: darkMode ? "#1a2332" : "#ffffff" }}>
+          <ArgonTypography variant="h5" color={darkMode ? "white" : "dark"}>Yarn Details</ArgonTypography>
         </DialogTitle>
         <DialogContent>
           {detailsRow && (

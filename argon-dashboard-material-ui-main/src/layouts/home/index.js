@@ -90,8 +90,8 @@ function Home() {
       <Card
         sx={{
           height: "100%",
-          minHeight: "260px",
-          maxHeight: "260px",
+          minHeight: "280px",
+          maxHeight: "280px",
           display: "flex",
           flexDirection: "column",
           background: darkMode
@@ -149,62 +149,192 @@ function Home() {
           </ArgonBox>
         </ArgonBox>
 
-        <Grid container spacing={1}>
+        <Grid container spacing={0.8}>
           <Grid item xs={6}>
-            <ArgonBox
-              p={0.9}
-              borderRadius="8px"
-              sx={{ background: darkMode ? "rgba(33, 150, 243, 0.08)" : "rgba(33, 150, 243, 0.06)" }}
-            >
-              <ArgonBox display="flex" alignItems="center" gap={0.75}>
-                <Icon sx={{ color: "#2196f3", fontSize: "18px" }}>trending_up</Icon>
-                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="1rem">
-                  {machine.efficiency}%
-                </ArgonTypography>
+            <Tooltip title="Efficiency" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(33, 150, 243, 0.08)" : "rgba(33, 150, 243, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(33, 150, 243, 0.15)" : "rgba(33, 150, 243, 0.12)"
+                  }
+                }}
+              >
+                <ArgonBox display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                  <Icon sx={{ color: "#2196f3", fontSize: "16px" }}>trending_up</Icon>
+                  <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.95rem">
+                    {machine.efficiency}%
+                  </ArgonTypography>
+                </ArgonBox>
               </ArgonBox>
-            </ArgonBox>
+            </Tooltip>
           </Grid>
           <Grid item xs={6}>
-            <ArgonBox
-              p={0.9}
-              borderRadius="8px"
-              sx={{ background: darkMode ? "rgba(76, 175, 80, 0.08)" : "rgba(76, 175, 80, 0.06)" }}
-            >
-              <ArgonBox display="flex" alignItems="center" gap={0.75}>
-                <Icon sx={{ color: "#4caf50", fontSize: "18px" }}>speed</Icon>
-                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="1rem">
-                  {machine.rpm}
-                </ArgonTypography>
+            <Tooltip title="RPM" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(76, 175, 80, 0.08)" : "rgba(76, 175, 80, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(76, 175, 80, 0.15)" : "rgba(76, 175, 80, 0.12)"
+                  }
+                }}
+              >
+                <ArgonBox display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                  <Icon sx={{ color: "#4caf50", fontSize: "16px" }}>speed</Icon>
+                  <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.95rem">
+                    {machine.rpm}
+                  </ArgonTypography>
+                </ArgonBox>
               </ArgonBox>
-            </ArgonBox>
+            </Tooltip>
           </Grid>
-          <Grid item xs={6}>
-            <ArgonBox
-              p={0.9}
-              borderRadius="8px"
-              sx={{ background: darkMode ? "rgba(255, 152, 0, 0.08)" : "rgba(255, 152, 0, 0.06)" }}
-            >
-              <ArgonBox display="flex" alignItems="center" gap={0.75}>
-                <Icon sx={{ color: "#ff9800", fontSize: "18px" }}>format_list_numbered</Icon>
-                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="1rem">
-                  {machine.pick}
-                </ArgonTypography>
-              </ArgonBox>
-            </ArgonBox>
-          </Grid>
-          <Grid item xs={6}>
-            <ArgonBox
-              p={0.9}
-              borderRadius="8px"
-              sx={{ background: darkMode ? "rgba(156, 39, 176, 0.08)" : "rgba(156, 39, 176, 0.06)" }}
-            >
-              <ArgonBox display="flex" alignItems="center" gap={0.75}>
-                <Icon sx={{ color: "#9c27b0", fontSize: "18px" }}>inventory_2</Icon>
-                <ArgonTypography variant="body2" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.9rem">
+          <Grid item xs={12}>
+            <Tooltip title="Quality Name" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(156, 39, 176, 0.08)" : "rgba(156, 39, 176, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(156, 39, 176, 0.15)" : "rgba(156, 39, 176, 0.12)"
+                  }
+                }}
+              >
+                <ArgonTypography variant="body2" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.9rem" textAlign="center">
                   {machine.qualityName}
                 </ArgonTypography>
               </ArgonBox>
-            </ArgonBox>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={6}>
+            <Tooltip title="Pick" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(255, 152, 0, 0.08)" : "rgba(255, 152, 0, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(255, 152, 0, 0.15)" : "rgba(255, 152, 0, 0.12)"
+                  }
+                }}
+              >
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.95rem" textAlign="center">
+                  {machine.pick}
+                </ArgonTypography>
+              </ArgonBox>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={6}>
+            <Tooltip title="Current / Total Stoppage" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(244, 67, 54, 0.08)" : "rgba(244, 67, 54, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(244, 67, 54, 0.15)" : "rgba(244, 67, 54, 0.12)"
+                  }
+                }}
+              >
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.95rem" textAlign="center">
+                  {machine.current}/{machine.totalStop}
+                </ArgonTypography>
+              </ArgonBox>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={6}>
+            <Tooltip title="Running Time" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(103, 58, 183, 0.08)" : "rgba(103, 58, 183, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(103, 58, 183, 0.15)" : "rgba(103, 58, 183, 0.12)"
+                  }
+                }}
+              >
+                <ArgonTypography variant="body2" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.85rem" textAlign="center">
+                  {machine.runningTime}
+                </ArgonTypography>
+              </ArgonBox>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={6}>
+            <Tooltip title="Shift Production" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(0, 150, 136, 0.08)" : "rgba(0, 150, 136, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(0, 150, 136, 0.15)" : "rgba(0, 150, 136, 0.12)"
+                  }
+                }}
+              >
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.95rem" textAlign="center">
+                  {machine.productionShift.toFixed(1)}
+                </ArgonTypography>
+              </ArgonBox>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={6}>
+            <Tooltip title="Day Production" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(233, 30, 99, 0.08)" : "rgba(233, 30, 99, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(233, 30, 99, 0.15)" : "rgba(233, 30, 99, 0.12)"
+                  }
+                }}
+              >
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.95rem" textAlign="center">
+                  {machine.productionDay.toFixed(1)}
+                </ArgonTypography>
+              </ArgonBox>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={6}>
+            <Tooltip title="Power On Time" arrow placement="top">
+              <ArgonBox
+                p={0.9}
+                borderRadius="8px"
+                sx={{ 
+                  background: darkMode ? "rgba(255, 193, 7, 0.08)" : "rgba(255, 193, 7, 0.06)",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    background: darkMode ? "rgba(255, 193, 7, 0.15)" : "rgba(255, 193, 7, 0.12)"
+                  }
+                }}
+              >
+                <ArgonTypography variant="body2" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize="0.85rem" textAlign="center">
+                  {machine.powerOnTime}
+                </ArgonTypography>
+              </ArgonBox>
+            </Tooltip>
           </Grid>
         </Grid>
       </Card>

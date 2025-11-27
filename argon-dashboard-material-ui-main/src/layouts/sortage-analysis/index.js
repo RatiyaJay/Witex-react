@@ -37,20 +37,23 @@ function SortageAnalysis() {
     return beamsData.filter(beam => beam.status === "running");
   }, []);
 
-  // Calculate sortage percentage
+  // Calculate shortage using formula: Total Beam Meter - (Remaining Beam Meter + Total Folding Meter)
   const beamsWithSortage = useMemo(() => {
     return runningBeams.map(beam => {
       const totalBeamMeter = beam.beamLength;
       const remainingBeamMeter = beam.remainingMeter;
-      const usedMeter = totalBeamMeter - remainingBeamMeter;
-      const sortagePercentage = totalBeamMeter > 0 
-        ? ((usedMeter / totalBeamMeter) * 100).toFixed(2) 
+      const totalFoldingMeter = beam.totalFoldingMeter || 0;
+      
+      // Shortage = Total Beam Meter - (Remaining Beam Meter + Total Folding Meter)
+      const shortageMeter = totalBeamMeter - (remainingBeamMeter + totalFoldingMeter);
+      const shortagePercentage = totalBeamMeter > 0 
+        ? ((shortageMeter / totalBeamMeter) * 100).toFixed(2) 
         : 0;
       
       return {
         ...beam,
-        sortagePercentage: `${sortagePercentage}%`,
-        usedMeter,
+        shortageMeter: Math.max(0, shortageMeter), // Ensure non-negative
+        shortagePercentage: `${shortagePercentage}%`,
       };
     });
   }, [runningBeams]);
@@ -116,13 +119,21 @@ function SortageAnalysis() {
       renderCell: (params) => `${params.value}m`,
     },
     { 
-      field: "usedMeter", 
-      headerName: "Used Meter", 
-      width: 120,
+      field: "shortageMeter", 
+      headerName: "Shortage (Meter)", 
+      width: 150,
       type: "number",
       align: "center",
       headerAlign: "center",
-      renderCell: (params) => `${params.value}m`,
+      renderCell: (params) => {
+        const value = params.value || 0;
+        const color = value > 100 ? "#f44336" : value > 50 ? "#ff9800" : "#4caf50";
+        return (
+          <ArgonTypography fontWeight="bold" sx={{ color }}>
+            {value.toFixed(2)}m
+          </ArgonTypography>
+        );
+      },
     },
     { 
       field: "totalFoldingTaka", 
@@ -142,14 +153,14 @@ function SortageAnalysis() {
       renderCell: (params) => `${params.value}m`,
     },
     { 
-      field: "sortagePercentage", 
-      headerName: "Sortage %", 
-      width: 120,
+      field: "shortagePercentage", 
+      headerName: "Shortage %", 
+      width: 130,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => {
         const percentage = parseFloat(params.value);
-        const color = percentage > 50 ? "#f44336" : percentage > 25 ? "#ff9800" : "#4caf50";
+        const color = percentage > 10 ? "#f44336" : percentage > 5 ? "#ff9800" : "#4caf50";
         return (
           <ArgonBox
             sx={{
@@ -174,10 +185,10 @@ function SortageAnalysis() {
       ["Quality Name", "yarnQuality"],
       ["Total Beam Meter", "beamLength"],
       ["Remaining Beam Meter", "remainingMeter"],
-      ["Used Meter", "usedMeter"],
       ["Folding Taka", "totalFoldingTaka"],
       ["Folding Meter", "totalFoldingMeter"],
-      ["Sortage %", "sortagePercentage"],
+      ["Shortage (Meter)", "shortageMeter"],
+      ["Shortage %", "shortagePercentage"],
     ];
     
     const escape = (v) => {
@@ -208,17 +219,19 @@ function SortageAnalysis() {
     const totalBeams = filteredRows.length;
     const totalBeamMeter = filteredRows.reduce((sum, b) => sum + b.beamLength, 0);
     const totalRemainingMeter = filteredRows.reduce((sum, b) => sum + b.remainingMeter, 0);
-    const totalUsedMeter = filteredRows.reduce((sum, b) => sum + b.usedMeter, 0);
-    const avgSortage = totalBeams > 0 
-      ? ((totalUsedMeter / totalBeamMeter) * 100).toFixed(2) 
+    const totalFoldingMeter = filteredRows.reduce((sum, b) => sum + (b.totalFoldingMeter || 0), 0);
+    const totalShortageMeter = filteredRows.reduce((sum, b) => sum + (b.shortageMeter || 0), 0);
+    const avgShortage = totalBeamMeter > 0 
+      ? ((totalShortageMeter / totalBeamMeter) * 100).toFixed(2) 
       : 0;
     
     return {
       totalBeams,
       totalBeamMeter,
       totalRemainingMeter,
-      totalUsedMeter,
-      avgSortage,
+      totalFoldingMeter,
+      totalShortageMeter,
+      avgShortage,
     };
   }, [filteredRows]);
 
@@ -241,7 +254,7 @@ function SortageAnalysis() {
 
             {/* Summary Cards */}
             <Grid container spacing={2} mb={3}>
-              <Grid item xs={12} sm={6} md={2.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
                   <ArgonTypography variant="caption" color="text" fontWeight="medium">
                     Total Beams
@@ -251,7 +264,7 @@ function SortageAnalysis() {
                   </ArgonTypography>
                 </Card>
               </Grid>
-              <Grid item xs={12} sm={6} md={2.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
                   <ArgonTypography variant="caption" color="text" fontWeight="medium">
                     Total Beam Meter
@@ -261,7 +274,7 @@ function SortageAnalysis() {
                   </ArgonTypography>
                 </Card>
               </Grid>
-              <Grid item xs={12} sm={6} md={2.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
                   <ArgonTypography variant="caption" color="text" fontWeight="medium">
                     Remaining Meter
@@ -271,23 +284,33 @@ function SortageAnalysis() {
                   </ArgonTypography>
                 </Card>
               </Grid>
-              <Grid item xs={12} sm={6} md={2.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
                   <ArgonTypography variant="caption" color="text" fontWeight="medium">
-                    Used Meter
+                    Folding Meter
                   </ArgonTypography>
                   <ArgonTypography variant="h5" fontWeight="bold" color="info">
-                    {summary.totalUsedMeter}m
+                    {summary.totalFoldingMeter}m
                   </ArgonTypography>
                 </Card>
               </Grid>
-              <Grid item xs={12} sm={6} md={2.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
                   <ArgonTypography variant="caption" color="text" fontWeight="medium">
-                    Avg Sortage
+                    Total Shortage
+                  </ArgonTypography>
+                  <ArgonTypography variant="h5" fontWeight="bold" color="error">
+                    {summary.totalShortageMeter.toFixed(2)}m
+                  </ArgonTypography>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
+                  <ArgonTypography variant="caption" color="text" fontWeight="medium">
+                    Avg Shortage %
                   </ArgonTypography>
                   <ArgonTypography variant="h5" fontWeight="bold" color="warning">
-                    {summary.avgSortage}%
+                    {summary.avgShortage}%
                   </ArgonTypography>
                 </Card>
               </Grid>

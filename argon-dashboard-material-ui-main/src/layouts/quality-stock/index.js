@@ -43,6 +43,8 @@ function QualityStock() {
     qualityName: "",
     totalTaka: "",
     totalMeter: "",
+    createdAt: "",
+    updatedAt: "",
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -97,6 +99,28 @@ function QualityStock() {
       type: "number",
       headerAlign: "center",
       align: "center"
+    },
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      minWidth: 180,
+      flex: 0.7,
+      headerAlign: "center",
+      align: "center",
+      valueFormatter: (params) => {
+        try { return new Date(params.value).toLocaleString(); } catch { return params.value; }
+      }
+    },
+    {
+      field: "updatedAt",
+      headerName: "Updated At",
+      minWidth: 180,
+      flex: 0.7,
+      headerAlign: "center",
+      align: "center",
+      valueFormatter: (params) => {
+        try { return new Date(params.value).toLocaleString(); } catch { return params.value; }
+      }
     },
     {
       field: "actions",
@@ -156,6 +180,8 @@ function QualityStock() {
       qualityName: "",
       totalTaka: "",
       totalMeter: "",
+      createdAt: "",
+      updatedAt: "",
     });
     setOpenForm(true);
   };
@@ -174,9 +200,11 @@ function QualityStock() {
   const handleFormSubmit = () => {
     if (formMode === "add") {
       const newId = rows.length ? Math.max(...rows.map((r) => Number(r.id))) + 1 : 1;
-      setRows((prev) => [{ id: newId, ...form }, ...prev]);
+      const now = new Date().toISOString();
+      setRows((prev) => [{ id: newId, ...form, createdAt: now, updatedAt: now }, ...prev]);
     } else if (formMode === "edit") {
-      setRows((prev) => prev.map((r) => (r.id === editingId ? { ...r, ...form } : r)));
+      const now = new Date().toISOString();
+      setRows((prev) => prev.map((r) => (r.id === editingId ? { ...r, ...form, updatedAt: now } : r)));
     }
     setOpenForm(false);
     setEditingId(null);
@@ -187,6 +215,8 @@ function QualityStock() {
       ["Quality Name", "qualityName"],
       ["Total Taka", "totalTaka"],
       ["Total Meter", "totalMeter"],
+      ["Created At", "createdAt"],
+      ["Updated At", "updatedAt"],
     ];
     const escape = (v) => {
       const s = String(v ?? "");
