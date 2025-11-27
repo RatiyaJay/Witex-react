@@ -46,12 +46,30 @@ function YarnManagement() {
     const p = searchParams.get("firmId");
     return p ? Number(p) : firmsData[0]?.id || null;
   });
-  const [rows, setRows] = useState(initialYarnData);
+  const [rows, setRows] = useState(initialYarnData.map(row => ({
+    ...row,
+    warping: row.warping || 0,
+    twisting: row.twisting || 0,
+    weft: row.weft || 0,
+    isArchived: row.isArchived || false,
+  })));
   const [gridReady, setGridReady] = useState(false);
   const [page, setPage] = useState(0);
   const pageSize = 10;
   const [openDetails, setOpenDetails] = useState(false);
   const [detailsRow, setDetailsRow] = useState(null);
+  
+  // View state for active/history - must be declared before useMemo hooks
+  const [view, setView] = useState("active");
+
+  // Transfer dialog state
+  const [openTransfer, setOpenTransfer] = useState(false);
+  const [transferRow, setTransferRow] = useState(null);
+  const [transferForm, setTransferForm] = useState({
+    warping: "",
+    twisting: "",
+    weft: "",
+  });
 
   useEffect(() => {
     const p = searchParams.get("firmId");
@@ -68,12 +86,15 @@ function YarnManagement() {
   const firmsOptions = useMemo(() => firmsData.map((f) => ({ label: f.companyName, id: f.id })), []);
   const selectedFirm = useMemo(() => firmsData.find((f) => f.id === selectedFirmId) || null, [selectedFirmId]);
   const filteredRows = useMemo(() => rows.filter((r) => r.firmId === selectedFirmId), [rows, selectedFirmId]);
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+  const activeRows = useMemo(() => filteredRows.filter(r => !r.isArchived), [filteredRows]);
+  const historyRows = useMemo(() => filteredRows.filter(r => r.isArchived), [filteredRows]);
+  const displayRows = view === "active" ? activeRows : historyRows;
+  const totalPages = Math.max(1, Math.ceil(displayRows.length / pageSize));
   const paginatedRows = useMemo(() => {
     const clampedPage = Math.min(page, totalPages - 1);
     const start = clampedPage * pageSize;
-    return filteredRows.slice(start, start + pageSize);
-  }, [filteredRows, page, totalPages]);
+    return displayRows.slice(start, start + pageSize);
+  }, [displayRows, page, totalPages]);
 
   const handleFirmChange = (_, value) => {
     if (value) {
@@ -103,6 +124,9 @@ function YarnManagement() {
     totalCone: "",
     netWeight: "",
     truckNo: "",
+    warping: 0,
+    twisting: 0,
+    weft: 0,
   });
 
   const openAddDialog = () => {
@@ -205,28 +229,84 @@ function YarnManagement() {
     URL.revokeObjectURL(url);
   };
 
+  const handleTransferOpen = (row) => {
+    setTransferRow(row);
+    setTransferForm({
+      warping: "",
+      twisting: "",
+      weft: "",
+    });
+    setOpenTransfer(true);
+  };
+
+  const handleTransferSave = () => {
+    if (!transferRow) return;
+
+    const warpingQty = Number(transferForm.warping || 0);
+    const twistingQty = Number(transferForm.twisting || 0);
+    const weftQty = Number(transferForm.weft || 0);
+    const totalTransfer = warpingQty + twistingQty + weftQty;
+
+    if (totalTransfer > transferRow.totalCartoon) {
+      alert(`Cannot transfer ${totalTransfer} cartoons. Only ${transferRow.totalCartoon} available.`);
+      return;
+    }
+
+    setRows((prev) =>
+      prev.map((r) => {
+        if (r.id === transferRow.id) {
+          const newTotal = r.totalCartoon - totalTransfer;
+          const newWarping = (r.warping || 0) + warpingQty;
+          const newTwisting = (r.twisting || 0) + twistingQty;
+          const newWeft = (r.weft || 0) + weftQty;
+
+          return {
+            ...r,
+            totalCartoon: newTotal,
+            warping: newWarping,
+            twisting: newTwisting,
+            weft: newWeft,
+            isArchived: newTotal === 0,
+          };
+        }
+        return r;
+      })
+    );
+
+    setOpenTransfer(false);
+    setTransferRow(null);
+  };
+
   const columns = [
-    { field: "challanDate", headerName: "Challan Date", flex: 0.9, minWidth: 140 },
-    { field: "challanNo", headerName: "Challan No.", flex: 0.9, minWidth: 130 },
-    { field: "fromFirm", headerName: "From (Firm)", flex: 1.1, minWidth: 160 },
-    { field: "qualityName", headerName: "Quality Name", flex: 1.0, minWidth: 150 },
-    { field: "grade", headerName: "Select Grade", flex: 0.8, minWidth: 120 },
-    { field: "netWeight", headerName: "Net Weight", flex: 0.9, minWidth: 130, type: "number" },
-    { field: "truckNo", headerName: "Truck No.", flex: 0.9, minWidth: 130 },
+    { field: "challanDate", headerName: "Challan Date", width: 120, align: "center", headerAlign: "center" },
+    { field: "challanNo", headerName: "Challan No.", width: 130, align: "center", headerAlign: "center" },
+    { field: "qualityName", headerName: "Quality Name", flex: 1, minWidth: 150, align: "center", headerAlign: "center" },
+    { field: "totalCartoon", headerName: "Total Cartoon", width: 120, type: "number", align: "center", headerAlign: "center" },
+    { field: "warping", headerName: "Warping", width: 100, type: "number", align: "center", headerAlign: "center", 
+      renderCell: (params) => params.value || 0 },
+    { field: "twisting", headerName: "Twisting", width: 100, type: "number", align: "center", headerAlign: "center",
+      renderCell: (params) => params.value || 0 },
+    { field: "weft", headerName: "Weft", width: 100, type: "number", align: "center", headerAlign: "center",
+      renderCell: (params) => params.value || 0 },
+    { field: "netWeight", headerName: "Net Weight", width: 120, type: "number", align: "center", headerAlign: "center" },
     {
       field: "actions",
       headerName: "Actions",
-      flex: 0.9,
-      minWidth: 160,
+      width: 180,
       sortable: false,
       filterable: false,
-      align: "right",
-      headerAlign: "right",
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <ArgonBox display="flex" justifyContent="flex-end" width="100%" gap={0.5}>
+        <ArgonBox display="flex" justifyContent="center" width="100%" gap={0.5}>
           <IconButton title="Details" size="small" color="info" onClick={() => { setDetailsRow(params.row); setOpenDetails(true); }}>
             <Icon fontSize="small">visibility</Icon>
           </IconButton>
+          {view === "active" && (
+            <IconButton title="Transfer" size="small" color="success" onClick={() => handleTransferOpen(params.row)}>
+              <Icon fontSize="small">swap_horiz</Icon>
+            </IconButton>
+          )}
           <IconButton title="Delete" size="small" color="error" onClick={() => askDelete(params.row)}>
             <Icon fontSize="small">delete</Icon>
           </IconButton>
@@ -308,6 +388,28 @@ function YarnManagement() {
                   </Grid>
                 </Grid>
 
+                {/* View Toggle */}
+                <ArgonBox display="flex" gap={1} mt={2} mb={2}>
+                  <ArgonButton
+                    size="small"
+                    color={view === "active" ? (sidenavColor || "warning") : "secondary"}
+                    variant={view === "active" ? "gradient" : "outlined"}
+                    onClick={() => { setView("active"); setPage(0); }}
+                    sx={{ borderRadius: "8px" }}
+                  >
+                    Active Yarn
+                  </ArgonButton>
+                  <ArgonButton
+                    size="small"
+                    color={view === "history" ? (sidenavColor || "warning") : "secondary"}
+                    variant={view === "history" ? "gradient" : "outlined"}
+                    onClick={() => { setView("history"); setPage(0); }}
+                    sx={{ borderRadius: "8px" }}
+                  >
+                    History
+                  </ArgonButton>
+                </ArgonBox>
+
                 <div style={{ height: 480, width: "100%" }}>
                   {gridReady && (
                     <DataGrid
@@ -334,7 +436,7 @@ function YarnManagement() {
                   gap={2}
                 >
                   <ArgonTypography variant="caption" color="text">
-                    Showing {paginatedRows.length} of {filteredRows.length} yarns
+                    Showing {paginatedRows.length} of {displayRows.length} yarns ({view === "active" ? "Active" : "History"})
                   </ArgonTypography>
                   <ArgonBox display="flex" alignItems="center" gap={1}>
                     <ArgonButton
@@ -496,6 +598,68 @@ function YarnManagement() {
           </ArgonButton>
           <ArgonButton color="error" variant="gradient" onClick={confirmDelete}>
             Delete
+          </ArgonButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Transfer Dialog */}
+      <Dialog open={openTransfer} onClose={() => setOpenTransfer(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <ArgonTypography variant="h5">Transfer Yarn to Departments</ArgonTypography>
+        </DialogTitle>
+        <DialogContent>
+          {transferRow && (
+            <ArgonBox mt={2}>
+              <ArgonTypography variant="body2" color="text" mb={2}>
+                Available Cartoons: <strong>{transferRow.totalCartoon}</strong>
+              </ArgonTypography>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <ArgonTypography variant="caption" fontWeight="bold">
+                    Warping
+                  </ArgonTypography>
+                  <ArgonInput
+                    type="number"
+                    fullWidth
+                    value={transferForm.warping}
+                    onChange={(e) => setTransferForm(prev => ({ ...prev, warping: e.target.value }))}
+                    placeholder="0"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ArgonTypography variant="caption" fontWeight="bold">
+                    Twisting
+                  </ArgonTypography>
+                  <ArgonInput
+                    type="number"
+                    fullWidth
+                    value={transferForm.twisting}
+                    onChange={(e) => setTransferForm(prev => ({ ...prev, twisting: e.target.value }))}
+                    placeholder="0"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <ArgonTypography variant="caption" fontWeight="bold">
+                    Weft
+                  </ArgonTypography>
+                  <ArgonInput
+                    type="number"
+                    fullWidth
+                    value={transferForm.weft}
+                    onChange={(e) => setTransferForm(prev => ({ ...prev, weft: e.target.value }))}
+                    placeholder="0"
+                  />
+                </Grid>
+              </Grid>
+            </ArgonBox>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <ArgonButton onClick={() => setOpenTransfer(false)} color="secondary" variant="outlined">
+            Cancel
+          </ArgonButton>
+          <ArgonButton onClick={handleTransferSave} color="success" variant="gradient">
+            <Icon sx={{ mr: 1 }}>swap_horiz</Icon> Transfer
           </ArgonButton>
         </DialogActions>
       </Dialog>

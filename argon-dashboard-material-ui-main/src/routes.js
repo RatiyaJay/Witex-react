@@ -35,6 +35,7 @@ Coded by www.creative-tim.com
 
 // Argon Dashboard 2 MUI layouts
 import Dashboard from "layouts/dashboard";
+import Home from "layouts/home";
 // Custom pages
 import MachineManagement from "layouts/machine-management";
 import ManageFirm from "layouts/manage-firm";
@@ -78,6 +79,14 @@ const routes = [
     route: "/dashboard",
     icon: <ArgonBox component="i" color="primary" fontSize="14px" className="ni ni-tv-2" />,
     component: <Dashboard />,
+  },
+  {
+    type: "route",
+    name: "Home",
+    key: "home",
+    route: "/home",
+    icon: <ArgonBox component="i" color="success" fontSize="14px" className="ni ni-building" />,
+    component: <Home />,
   },
   { type: "title", title: "Operations", key: "operations-title" },
   { type: "route", name: "Machine Management", key: "machine-management", route: "/machine-management", icon: "build", component: <MachineManagement /> },

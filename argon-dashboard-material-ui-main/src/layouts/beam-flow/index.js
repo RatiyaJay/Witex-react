@@ -82,7 +82,8 @@ function BeamFlow() {
     return filteredRows.slice(start, start + pageSize);
   }, [filteredRows, page, totalPages]);
 
-  const allColumns = [
+  // Base columns that are always visible
+  const baseColumns = [
     { field: "beamNo", headerName: "Beam No.", width: 110, align: "center", headerAlign: "center" },
     { 
       field: "machineNo", 
@@ -90,15 +91,23 @@ function BeamFlow() {
       width: 110, 
       align: "center", 
       headerAlign: "center",
-      editable: tab === "added",
+      editable: tab === "added", // Only editable in "added" tab
       type: "singleSelect",
       valueOptions: machinesData.map(m => m.machineNumber),
     },
     { field: "partyName", headerName: "Party Name", width: 150, align: "center", headerAlign: "center" },
     { field: "beamLength", headerName: "Beam Length", width: 120, type: "number", align: "center", headerAlign: "center" },
-    { field: "remainingMeter", headerName: "Remaining Meter", width: 140, type: "number", align: "center", headerAlign: "center" },
-    { field: "remainingPercentage", headerName: "Remaining %", width: 130, align: "center", headerAlign: "center" },
-    { field: "daysToFinish", headerName: "Days To Finish", width: 130, type: "number", align: "center", headerAlign: "center" },
+  ];
+
+  // Calculated columns - only show in "running" and "released" tabs
+  const calculatedColumns = tab !== "added" ? [
+    { field: "remainingMeter", headerName: "Remaining Meter", width: 140, type: "number", align: "center", headerAlign: "center", editable: false },
+    { field: "remainingPercentage", headerName: "Remaining %", width: 130, align: "center", headerAlign: "center", editable: false },
+    { field: "daysToFinish", headerName: "Days To Finish", width: 130, type: "number", align: "center", headerAlign: "center", editable: false },
+  ] : [];
+
+  // Additional columns
+  const additionalColumns = [
     { 
       field: "pick", 
       headerName: "Pick", 
@@ -110,43 +119,53 @@ function BeamFlow() {
         return machine ? machine.pick : "-";
       }
     },
+    { 
+      field: "beamGetter", 
+      headerName: "Beam Getter", 
+      width: 120,
+      align: "center",
+      headerAlign: "center",
+      editable: tab === "added", // Only editable in "added" tab
+    },
     { field: "pipeNumber", headerName: "Pipe Number", width: 120, align: "center", headerAlign: "center" },
     { field: "totalEnds", headerName: "Ends", width: 100, type: "number", align: "center", headerAlign: "center" },
     { field: "pannaNo", headerName: "PANNO", width: 140, align: "center", headerAlign: "center" },
     { field: "danier", headerName: "Danier", width: 90, align: "center", headerAlign: "center" },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 0.9,
-      minWidth: 180,
-      sortable: false,
-      filterable: false,
-      align: "right",
-      headerAlign: "right",
-      renderCell: (params) => (
-        <ArgonBox display="flex" justifyContent="flex-end" width="100%" gap={0.5}>
-          <IconButton title="Details" size="small" color="info" onClick={() => { setDetailsRow(params.row); setOpenDetails(true); }}>
-            <Icon fontSize="small">visibility</Icon>
-          </IconButton>
-          {tab === "added" && (
-            <IconButton title="Start (to Running)" size="small" color="success" onClick={() => moveTo("running", params.row)}>
-              <Icon fontSize="small">play_arrow</Icon>
-            </IconButton>
-          )}
-          {tab === "running" && (
-            <IconButton title="Release (to Released)" size="small" color="info" onClick={() => moveTo("released", params.row)}>
-              <Icon fontSize="small">check_circle</Icon>
-            </IconButton>
-          )}
-          <IconButton title="Delete" size="small" color="error" onClick={() => askDelete(params.row)}>
-            <Icon fontSize="small">delete</Icon>
-          </IconButton>
-        </ArgonBox>
-      ),
-    },
   ];
 
-  const columns = allColumns;
+  const actionsColumn = {
+    field: "actions",
+    headerName: "Actions",
+    flex: 0.9,
+    minWidth: 180,
+    sortable: false,
+    filterable: false,
+    align: "right",
+    headerAlign: "right",
+    renderCell: (params) => (
+      <ArgonBox display="flex" justifyContent="flex-end" width="100%" gap={0.5}>
+        <IconButton title="Details" size="small" color="info" onClick={() => { setDetailsRow(params.row); setOpenDetails(true); }}>
+          <Icon fontSize="small">visibility</Icon>
+        </IconButton>
+        {tab === "added" && (
+          <IconButton title="Start (to Running)" size="small" color="success" onClick={() => moveTo("running", params.row)}>
+            <Icon fontSize="small">play_arrow</Icon>
+          </IconButton>
+        )}
+        {tab === "running" && (
+          <IconButton title="Release (to Released)" size="small" color="info" onClick={() => moveTo("released", params.row)}>
+            <Icon fontSize="small">check_circle</Icon>
+          </IconButton>
+        )}
+        <IconButton title="Delete" size="small" color="error" onClick={() => askDelete(params.row)}>
+          <Icon fontSize="small">delete</Icon>
+        </IconButton>
+      </ArgonBox>
+    ),
+  };
+
+  // Combine columns based on current tab
+  const columns = [...baseColumns, ...calculatedColumns, ...additionalColumns, actionsColumn];
 
   const exportCsv = () => {
     const headers = [
@@ -206,27 +225,35 @@ function BeamFlow() {
     yarnQuality: "",
     lotNo: "",
     beamLength: "",
-    remainingMeter: "",
-    remainingPercentage: "",
-    daysToFinish: "",
     pannaNo: "",
     danier: "",
     totalEnds: "",
     pipeNumber: "",
     krills: "",
     section: "",
+    beamGetter: "",
   });
 
   const openAddDialog = () => setOpenAdd(true);
   const closeAddDialog = () => setOpenAdd(false);
   const handleFormChange = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
   const handleAddSave = () => {
+    const beamLength = Number(form.beamLength || 0);
+    // Initially, remaining meter equals beam length (100%)
+    const remainingMeter = beamLength;
+    const remainingPercentage = "100%";
+    // Days to finish calculation (placeholder - can be updated based on production rate)
+    const daysToFinish = 0;
+    
     const newRow = {
       id: Date.now(),
       status: "added",
       ...form,
       machineNo: "", // Machine will be selected from table
-      beamLength: Number(form.beamLength || 0),
+      beamLength: beamLength,
+      remainingMeter: remainingMeter,
+      remainingPercentage: remainingPercentage,
+      daysToFinish: daysToFinish,
       totalEnds: Number(form.totalEnds || 0),
       krills: Number(form.krills || 0),
     };
@@ -247,7 +274,22 @@ function BeamFlow() {
 
   // Move to next status
   const moveTo = (next, row) => {
-    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, status: next } : r)));
+    setRows((prev) => prev.map((r) => {
+      if (r.id === row.id) {
+        const updatedRow = { ...r, status: next };
+        
+        // When moving to "running", auto-calculate remaining values
+        if (next === "running") {
+          const beamLength = Number(r.beamLength || 0);
+          updatedRow.remainingMeter = beamLength; // Initially 100%
+          updatedRow.remainingPercentage = "100%";
+          updatedRow.daysToFinish = 0; // Will be calculated based on production rate
+        }
+        
+        return updatedRow;
+      }
+      return r;
+    }));
     setTab(next);
   };
 
@@ -527,30 +569,6 @@ function BeamFlow() {
                 </ArgonBox>
                 <ArgonInput fullWidth type="number" placeholder="e.g., 1200" value={form.beamLength} onChange={handleFormChange("beamLength")} />
               </Grid>
-              <Grid item xs={12} md={4}>
-                <ArgonBox mb={1}>
-                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                    Remaining Meter
-                  </ArgonTypography>
-                </ArgonBox>
-                <ArgonInput fullWidth type="number" placeholder="e.g., 1150" value={form.remainingMeter} onChange={handleFormChange("remainingMeter")} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <ArgonBox mb={1}>
-                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                    Remaining Percentage
-                  </ArgonTypography>
-                </ArgonBox>
-                <ArgonInput fullWidth placeholder="e.g., 95.8%" value={form.remainingPercentage} onChange={handleFormChange("remainingPercentage")} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <ArgonBox mb={1}>
-                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                    Days To Finish
-                  </ArgonTypography>
-                </ArgonBox>
-                <ArgonInput fullWidth type="number" placeholder="e.g., 3" value={form.daysToFinish} onChange={handleFormChange("daysToFinish")} />
-              </Grid>
 
               <Grid item xs={12} md={4}>
                 <ArgonBox mb={1}>
@@ -600,6 +618,14 @@ function BeamFlow() {
                   </ArgonTypography>
                 </ArgonBox>
                 <ArgonInput fullWidth placeholder="e.g., P-12" value={form.pipeNumber} onChange={handleFormChange("pipeNumber")} />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <ArgonBox mb={1}>
+                  <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                    Beam Getter
+                  </ArgonTypography>
+                </ArgonBox>
+                <ArgonInput fullWidth placeholder="e.g., John Doe" value={form.beamGetter} onChange={handleFormChange("beamGetter")} />
               </Grid>
             </Grid>
           </ArgonBox>

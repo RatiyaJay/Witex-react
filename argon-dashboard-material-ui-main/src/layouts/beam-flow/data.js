@@ -23,6 +23,7 @@ export const beamsData = [
     totalFoldingMeter: 1180,
     krills: 12,
     section: "A",
+    beamGetter: "Rajesh Kumar",
   },
   {
     id: 2,
@@ -48,6 +49,7 @@ export const beamsData = [
     totalFoldingMeter: 950,
     krills: 10,
     section: "B",
+    beamGetter: "Amit Patel",
   },
   {
     id: 3,

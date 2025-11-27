@@ -181,6 +181,17 @@ function MachineManagement() {
       }
     },
     { 
+      field: "beamGetter", 
+      headerName: "Beam Getter", 
+      width: 120,
+      headerAlign: "center",
+      align: "center",
+      valueGetter: (params) => {
+        const beam = beamsData.find(b => b.machineNo === params.row.machineNumber && b.status === "running");
+        return beam ? beam.beamGetter || "-" : "-";
+      }
+    },
+    { 
       field: "partyName", 
       headerName: "Party Name", 
       width: 150,

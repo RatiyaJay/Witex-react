@@ -1,325 +1,672 @@
-import { useMemo, useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import FormControl from "@mui/material/FormControl";
+import Icon from "@mui/material/Icon";
+import { useTheme } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import Icon from "@mui/material/Icon";
 import { DataGrid } from "@mui/x-data-grid";
-import { useTheme } from "@mui/material/styles";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonButton from "components/ArgonButton";
 import ArgonInput from "components/ArgonInput";
 
-import { productionEntryData } from "./data";
 import { machinesData } from "../machine-management/data";
 import { useArgonController } from "context";
-import { 
-  getTableStyles, 
-  getPaginationButtonStyles, 
-  getExportButtonStyles 
-} from "utils/tableStyles";
+import { getTableStyles } from "utils/tableStyles";
 
 function ProductionEntry({ qualities }) {
   const [controller] = useArgonController();
   const { darkMode, sidenavColor } = controller;
   const theme = useTheme();
   
-  const [rows, setRows] = useState(productionEntryData);
-  const [page, setPage] = useState(0);
-  const pageSize = 10;
+  // Page header state (persistent across entries)
+  const [pageNo, setPageNo] = useState("1");
+  const [dateTime, setDateTime] = useState(new Date().toISOString().slice(0, 16));
+  const [selectedQuality, setSelectedQuality] = useState("");
+  const [lastMachineNo, setLastMachineNo] = useState("");
 
-  const [openForm, setOpenForm] = useState(false);
-  const [form, setForm] = useState({
-    pageNo: "",
-    dateTime: "",
-    qualityName: "",
-    takaNo: "",
-    totalTaka: "",
-    meter: "",
-    totalMeter: "",
-    machineNo: "",
-    tp: "",
-  });
+  // Track total entries across all pages for continuous Taka numbering
+  const [totalEntriesCount, setTotalEntriesCount] = useState(0);
+  
+  // Current page starting Taka number
+  const [currentPageStartTaka, setCurrentPageStartTaka] = useState(1);
 
-  const [lastQuality, setLastQuality] = useState("");
+  // Table rows - start with 1 row, add more dynamically
+  const [entries, setEntries] = useState([
+    {
+      takaNo: 1,
+      meter: "",
+      tp: "",
+    }
+  ]);
+
+  // All saved entries
+  const [savedEntries, setSavedEntries] = useState([]);
+  const [openPagesDialog, setOpenPagesDialog] = useState(false);
+  const [editingPageNo, setEditingPageNo] = useState(null);
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [notifySeverity, setNotifySeverity] = useState("info");
+
+  // Refs for fast navigation
+  const inputRefs = useRef({});
 
   useEffect(() => {
-    setPage(0);
-  }, []);
+    // Set initial quality if available
+    if (qualities.length > 0 && !selectedQuality) {
+      setSelectedQuality(qualities[0].qualityName);
+    }
+  }, [qualities, selectedQuality]);
 
-  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
-  const paginatedRows = useMemo(() => {
-    const clampedPage = Math.min(page, totalPages - 1);
-    const start = clampedPage * pageSize;
-    return rows.slice(start, start + pageSize);
-  }, [rows, page, totalPages]);
-
-  const columns = [
-    { field: "pageNo", headerName: "Page No.", width: 100, align: "center", headerAlign: "center" },
-    { field: "dateTime", headerName: "Date & Time", width: 150, align: "center", headerAlign: "center" },
-    { field: "qualityName", headerName: "Quality Name", flex: 1, minWidth: 150, align: "center", headerAlign: "center" },
-    { field: "takaNo", headerName: "Taka No.", width: 100, type: "number", align: "center", headerAlign: "center" },
-    { field: "totalTaka", headerName: "Total Taka", width: 110, type: "number", align: "center", headerAlign: "center" },
-    { field: "meter", headerName: "Meter", width: 90, type: "number", align: "center", headerAlign: "center" },
-    { field: "totalMeter", headerName: "Total Meter", width: 110, type: "number", align: "center", headerAlign: "center" },
-    { field: "machineNo", headerName: "Machine No.", width: 120, align: "center", headerAlign: "center" },
-    { field: "tp", headerName: "TP", width: 100, align: "center", headerAlign: "center" },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 80,
-      sortable: false,
-      filterable: false,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => (
-        <IconButton 
-          title="Delete" 
-          size="small" 
-          color="error" 
-          onClick={() => handleDelete(params.row.id)}
-          sx={{
-            borderRadius: "10px",
-            transition: "all 0.2s ease-in-out",
-            "&:hover": {
-              transform: "scale(1.1)",
-              backgroundColor: darkMode ? "rgba(244, 67, 54, 0.2)" : "rgba(244, 67, 54, 0.12)",
-            },
-          }}
-        >
-          <Icon fontSize="small">delete</Icon>
-        </IconButton>
-      ),
-    },
-  ];
-
-  const handleAddClick = () => {
-    const now = new Date();
-    const dateTimeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const handleInputChange = (index, field, value) => {
+    const newEntries = [...entries];
+    newEntries[index][field] = value;
     
-    const lastPageNo = rows.length > 0 ? Math.max(...rows.map(r => r.pageNo)) : 0;
-    const lastTakaNo = rows.length > 0 ? Math.max(...rows.map(r => r.takaNo)) : 0;
+    // If Taka No. is changed, update all subsequent rows
+    if (field === "takaNo") {
+      const startTaka = Number(value);
+      for (let i = index; i < newEntries.length; i++) {
+        newEntries[i].takaNo = startTaka + (i - index);
+      }
+    }
     
-    setForm({
-      pageNo: lastPageNo + 1,
-      dateTime: dateTimeStr,
-      qualityName: lastQuality || "",
-      takaNo: lastTakaNo + 1,
-      totalTaka: "",
-      meter: "",
-      totalMeter: "",
-      machineNo: "",
-      tp: "",
-    });
-    setOpenForm(true);
+    setEntries(newEntries);
+
+    // Add new row if this is the last row and user is entering data (not for takaNo field)
+    if (index === entries.length - 1 && value && field !== "takaNo") {
+      const nextTakaNo = newEntries[index].takaNo + 1;
+      setEntries([
+        ...newEntries,
+        {
+          takaNo: nextTakaNo,
+          meter: "",
+          tp: "",
+        }
+      ]);
+    }
   };
 
-  const handleFormChange = (key, value) => {
-    setForm((f) => ({ ...f, [key]: value }));
+  const handleKeyDown = (e, rowIndex, field) => {
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      
+      const fields = ["meter", "tp"];
+      const currentFieldIndex = fields.indexOf(field);
+      
+      if (currentFieldIndex < fields.length - 1) {
+        // Move to next field in same row
+        const nextField = fields[currentFieldIndex + 1];
+        const nextRef = inputRefs.current[`${rowIndex}-${nextField}`];
+        if (nextRef) nextRef.focus();
+      } else {
+        // Move to first field of next row (will be created if doesn't exist)
+        setTimeout(() => {
+          const nextRef = inputRefs.current[`${rowIndex + 1}-meter`];
+          if (nextRef) nextRef.focus();
+        }, 100);
+      }
+    }
   };
 
-  const handleFormSubmit = () => {
-    const newId = rows.length ? Math.max(...rows.map(r => r.id)) + 1 : 1;
-    const newRow = {
-      id: newId,
-      ...form,
-      totalTaka: Number(form.totalTaka) || 0,
-      meter: Number(form.meter) || 0,
-      totalMeter: Number(form.totalMeter) || 0,
-    };
-    setRows([newRow, ...rows]);
-    setLastQuality(form.qualityName);
-    setOpenForm(false);
+  const handleSaveEntry = () => {
+    // Filter out empty rows
+    const filledEntries = entries.filter(entry => entry.meter || entry.tp);
+    
+    if (filledEntries.length === 0) {
+      setNotifyMessage("Please fill at least one entry");
+      setNotifySeverity("error");
+      setNotifyOpen(true);
+      return;
+    }
+
+    if (!selectedQuality) {
+      setNotifyMessage("Please select a quality");
+      setNotifySeverity("error");
+      setNotifyOpen(true);
+      return;
+    }
+
+    if (!lastMachineNo) {
+      setNotifyMessage("Please select a machine");
+      setNotifySeverity("error");
+      setNotifyOpen(true);
+      return;
+    }
+
+    const composedEntries = filledEntries.map((entry, idx) => ({
+      id: Date.now() + idx,
+      pageNo,
+      dateTime,
+      qualityName: selectedQuality,
+      machineNo: lastMachineNo,
+      ...entry,
+    }));
+
+    if (editingPageNo !== null) {
+      const remaining = savedEntries.filter(e => e.pageNo !== String(editingPageNo) && e.pageNo !== editingPageNo);
+      setSavedEntries([...remaining, ...composedEntries]);
+      setEditingPageNo(null);
+      setNotifyMessage(`Updated page ${pageNo} successfully`);
+      setNotifySeverity("success");
+      setNotifyOpen(true);
+      return;
+    }
+
+    setSavedEntries([...savedEntries, ...composedEntries]);
+
+    const newTotalCount = totalEntriesCount + filledEntries.length;
+    setTotalEntriesCount(newTotalCount);
+    const nextStartTaka = newTotalCount + 1;
+    setCurrentPageStartTaka(nextStartTaka);
+    setEntries([
+      {
+        takaNo: nextStartTaka,
+        meter: "",
+        tp: "",
+      }
+    ]);
+    setPageNo(String(Number(pageNo) + 1));
+    setNotifyMessage(`Saved ${filledEntries.length} entries successfully. Next page starts at Taka ${nextStartTaka}`);
+    setNotifySeverity("success");
+    setNotifyOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setRows(rows.filter(r => r.id !== id));
+  const exportCurrentPage = () => {
+    const currentPageEntries = savedEntries.filter(entry => entry.pageNo === String(Number(pageNo) - 1));
+    
+    if (currentPageEntries.length === 0) {
+      setNotifyMessage("No entries found for the previous page");
+      setNotifySeverity("warning");
+      setNotifyOpen(true);
+      return;
+    }
+
+    exportToExcel(currentPageEntries, `Page_${Number(pageNo) - 1}_Entries`);
+  };
+
+  const exportAllPages = () => {
+    if (savedEntries.length === 0) {
+      setNotifyMessage("No entries to export");
+      setNotifySeverity("warning");
+      setNotifyOpen(true);
+      return;
+    }
+
+    exportToExcel(savedEntries, "All_Pages_Entries");
+  };
+
+  const exportToExcel = (data, filename) => {
+    const headers = ["Page No.", "Taka No.", "Date & Time", "Quality Name", "Machine No.", "Meter", "TP"];
+    const csvContent = [
+      headers.join(","),
+      ...data.map(entry => 
+        [entry.pageNo, entry.takaNo, entry.dateTime, entry.qualityName, entry.machineNo, entry.meter || "", entry.tp || ""].join(",")
+      )
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${filename}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleNewPage = () => {
+    // Clear current page but keep the Taka sequence
+    setEntries([
+      {
+        takaNo: currentPageStartTaka,
+        meter: "",
+        tp: "",
+      }
+    ]);
   };
 
   return (
-    <>
-      <ArgonBox display="flex" justifyContent="flex-end" mb={2}>
-        <ArgonButton 
-          color={sidenavColor || "warning"} 
-          variant="gradient" 
-          onClick={handleAddClick}
-          sx={getExportButtonStyles(theme, sidenavColor)}
-        >
-          <Icon sx={{ mr: 1 }}>add</Icon> Add Entry
-        </ArgonButton>
+    <ArgonBox>
+      {/* Page Header */}
+      <ArgonBox 
+        p={2.5} 
+        mb={2}
+        borderRadius="12px"
+        sx={{
+          background: theme.functions.linearGradient(
+            theme.functions.rgba(theme.palette[sidenavColor]?.main || theme.palette.info.main, darkMode ? 0.14 : 0.1),
+            theme.functions.rgba(theme.palette.gradients?.[sidenavColor]?.state || theme.palette.gradients.info.state, darkMode ? 0.14 : 0.1),
+            135
+          ),
+          border: `1px solid ${theme.functions.rgba(theme.palette[sidenavColor]?.main || theme.palette.info.main, darkMode ? 0.25 : 0.18)}`,
+        }}
+      >
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={2}>
+            <ArgonTypography variant="caption" fontWeight="bold" color={darkMode ? "white" : "dark"}>
+              Page No.
+            </ArgonTypography>
+            <ArgonInput
+              type="number"
+              value={pageNo}
+              onChange={(e) => setPageNo(e.target.value)}
+              placeholder="1"
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <ArgonTypography variant="caption" fontWeight="bold" color={darkMode ? "white" : "dark"}>
+              Date & Time
+            </ArgonTypography>
+            <ArgonInput
+              type="datetime-local"
+              value={dateTime}
+              onChange={(e) => setDateTime(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <ArgonTypography variant="caption" fontWeight="bold" color={darkMode ? "white" : "dark"}>
+              Quality Name
+            </ArgonTypography>
+            <FormControl fullWidth>
+              <Select
+                value={selectedQuality}
+                onChange={(e) => setSelectedQuality(e.target.value)}
+                sx={{ 
+                  height: "42px",
+                  color: darkMode ? "#fff" : "inherit",
+                }}
+              >
+                {qualities.map((q) => (
+                  <MenuItem key={q.id} value={q.qualityName}>
+                    {q.qualityName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <ArgonTypography variant="caption" fontWeight="bold" color={darkMode ? "white" : "dark"}>
+              Machine No.
+            </ArgonTypography>
+            <FormControl fullWidth>
+              <Select
+                value={lastMachineNo}
+                onChange={(e) => {
+                  setLastMachineNo(e.target.value);
+                }}
+                displayEmpty
+                sx={{ 
+                  height: "42px",
+                  color: darkMode ? "#fff" : "inherit",
+                }}
+              >
+                <MenuItem value="">Select Machine</MenuItem>
+                {machinesData.map((m) => (
+                  <MenuItem key={m.id} value={m.machineNumber}>
+                    {m.machineNumber}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <ArgonBox display="flex" gap={1}>
+              <ArgonButton
+                size="small"
+                color="info"
+                variant="outlined"
+                onClick={handleNewPage}
+                fullWidth
+                sx={{ borderRadius: "8px" }}
+              >
+                <Icon sx={{ mr: 0.5 }}>refresh</Icon> Clear
+              </ArgonButton>
+              <ArgonButton
+                size="small"
+                color={sidenavColor || "success"}
+                variant="gradient"
+                onClick={handleSaveEntry}
+                fullWidth
+                sx={{ borderRadius: "8px" }}
+              >
+                <Icon sx={{ mr: 0.5 }}>save</Icon> Save
+              </ArgonButton>
+              <ArgonButton
+                size="small"
+                color={sidenavColor || "warning"}
+                variant="outlined"
+                onClick={() => setOpenPagesDialog(true)}
+                fullWidth
+                sx={{ borderRadius: "8px" }}
+              >
+                <Icon sx={{ mr: 0.5 }}>view_list</Icon> Pages
+              </ArgonButton>
+            </ArgonBox>
+          </Grid>
+        </Grid>
       </ArgonBox>
 
-      <div style={{ height: 480, width: "100%" }}>
-        <DataGrid
-          rows={paginatedRows}
-          columns={columns}
-          disableColumnMenu
-          disableRowSelectionOnClick
-          hideFooter
-          getRowId={(row) => row.id}
-          rowHeight={56}
-          columnHeaderHeight={52}
-          sx={getTableStyles(theme, darkMode, sidenavColor)}
-        />
-      </div>
-
-      <ArgonBox 
-        mt={2.5} 
-        pt={2.5}
-        borderTop={darkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e9ecef"}
-        display="flex" 
-        alignItems="center" 
-        justifyContent="space-between"
+      {/* Redesigned Entry Grid */}
+      <ArgonBox
+        sx={{
+          borderRadius: "12px",
+          border: darkMode ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
+          maxHeight: "600px",
+          overflowY: "auto",
+          width: "100%",
+        }}
       >
-        <ArgonTypography variant="caption" color="text">
-          Showing {paginatedRows.length} of {rows.length} entries
+        <ArgonBox
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 1,
+            background: darkMode ? "#1a2332" : "#f8f9fa",
+            display: "flex",
+            alignItems: "center",
+            borderBottom: darkMode ? "1px solid rgba(255,255,255,0.08)" : "1px solid #e5e7eb",
+          }}
+        >
+          <ArgonBox sx={{ width: "15%", padding: "8px", textAlign: "center", fontWeight: "bold", color: darkMode ? "#fff" : "inherit" }}>Taka No.</ArgonBox>
+          <ArgonBox sx={{ width: "42.5%", padding: "8px", textAlign: "center", fontWeight: "bold", color: darkMode ? "#fff" : "inherit" }}>Meter</ArgonBox>
+          <ArgonBox sx={{ width: "42.5%", padding: "8px", textAlign: "center", fontWeight: "bold", color: darkMode ? "#fff" : "inherit" }}>TP</ArgonBox>
+        </ArgonBox>
+
+        {entries.map((entry, index) => (
+          <ArgonBox
+            key={entry.takaNo}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              "&:hover": {
+                background: darkMode ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.02)",
+              },
+            }}
+          >
+            <ArgonBox sx={{ width: "15%", padding: "8px" }}>
+              <ArgonInput
+                type="number"
+                value={entry.takaNo}
+                onChange={(e) => {
+                  const newTakaNo = Number(e.target.value);
+                  handleInputChange(index, "takaNo", newTakaNo);
+                  if (index === 0) {
+                    setCurrentPageStartTaka(newTakaNo);
+                  }
+                }}
+                placeholder="1"
+                size="small"
+                fullWidth
+                sx={{ "& input": { textAlign: "center", fontWeight: "bold" } }}
+              />
+            </ArgonBox>
+            <ArgonBox sx={{ width: "42.5%", padding: "8px" }}>
+              <ArgonInput
+                type="number"
+                value={entry.meter}
+                onChange={(e) => handleInputChange(index, "meter", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, index, "meter")}
+                inputRef={(el) => (inputRefs.current[`${index}-meter`] = el)}
+                placeholder="0"
+                size="small"
+                fullWidth
+                sx={{ "& input": { textAlign: "center" } }}
+              />
+            </ArgonBox>
+            <ArgonBox sx={{ width: "42.5%", padding: "8px" }}>
+              <ArgonInput
+                value={entry.tp}
+                onChange={(e) => handleInputChange(index, "tp", e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, index, "tp")}
+                inputRef={(el) => (inputRefs.current[`${index}-tp`] = el)}
+                placeholder="-"
+                size="small"
+                fullWidth
+                sx={{ "& input": { textAlign: "center" } }}
+              />
+            </ArgonBox>
+          </ArgonBox>
+        ))}
+      </ArgonBox>
+
+      {/* Saved Entries View */}
+      {savedEntries.length > 0 && (
+        <ArgonBox mt={3}>
+      <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <ArgonTypography variant="h6" color={darkMode ? "white" : "dark"}>
+          Saved Entries: {savedEntries.length}
         </ArgonTypography>
-        <ArgonBox display="flex" alignItems="center" gap={1}>
+        <ArgonBox display="flex" gap={1}>
           <ArgonButton
             size="small"
-            variant={darkMode ? "outlined" : "gradient"}
             color={sidenavColor || "warning"}
-            disabled={page === 0}
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
+            variant="outlined"
+            onClick={() => setOpenPagesDialog(true)}
+            sx={{ borderRadius: "8px" }}
           >
-            <Icon fontSize="small">chevron_left</Icon>
+            <Icon sx={{ mr: 0.5 }}>view_list</Icon> Pages
           </ArgonButton>
-          <ArgonTypography variant="button" color="text" px={2} sx={{ fontWeight: 600, color: darkMode ? "#fff" : "inherit" }}>
-            {page + 1} / {totalPages}
-          </ArgonTypography>
           <ArgonButton
             size="small"
-            variant={darkMode ? "outlined" : "gradient"}
-            color={sidenavColor || "warning"}
-            disabled={page >= totalPages - 1}
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            sx={getPaginationButtonStyles(theme, darkMode, sidenavColor)}
+            color="info"
+            variant="gradient"
+            onClick={exportCurrentPage}
+            sx={{ borderRadius: "8px" }}
           >
-            <Icon fontSize="small">chevron_right</Icon>
+            <Icon sx={{ mr: 0.5 }}>file_download</Icon> Export Current Page
+          </ArgonButton>
+          <ArgonButton
+            size="small"
+            color={sidenavColor || "success"}
+            variant="gradient"
+            onClick={exportAllPages}
+            sx={{ borderRadius: "8px" }}
+          >
+            <Icon sx={{ mr: 0.5 }}>file_download</Icon> Export All Pages
           </ArgonButton>
         </ArgonBox>
       </ArgonBox>
+          <div style={{ height: 380, width: "100%" }}>
+            {(() => {
+              const qualityOptions = qualities.map((q) => q.qualityName);
+              const machineOptions = (machinesData || []).map((m) => m.machineNumber);
+              const renderSelectEditCell = (params, options) => (
+                <FormControl fullWidth>
+                  <Select
+                    value={params.value ?? ""}
+                    onChange={(e) => {
+                      params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value });
+                    }}
+                    sx={{ height: 36 }}
+                  >
+                    {options.map((opt) => (
+                      <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              );
+              return (
+                <DataGrid
+                  rows={savedEntries}
+                  columns={[
+                    { field: "pageNo", headerName: "Page No.", width: 110, headerAlign: "center", align: "center", editable: true },
+                    { field: "takaNo", headerName: "Taka No.", width: 110, headerAlign: "center", align: "center", editable: true },
+                    { 
+                      field: "dateTime", 
+                      headerName: "Date & Time", 
+                      flex: 1, 
+                      minWidth: 180, 
+                      headerAlign: "center", 
+                      align: "center", 
+                      editable: true,
+                      renderEditCell: (params) => (
+                        <ArgonInput 
+                          type="datetime-local" 
+                          value={params.value ?? ""}
+                          onChange={(e) => {
+                            params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value });
+                          }}
+                          fullWidth
+                        />
+                      )
+                    },
+                    { field: "qualityName", headerName: "Quality", width: 160, headerAlign: "center", align: "center", editable: true, renderEditCell: (p) => renderSelectEditCell(p, qualityOptions) },
+                    { field: "machineNo", headerName: "Machine", width: 120, headerAlign: "center", align: "center", editable: true, renderEditCell: (p) => renderSelectEditCell(p, machineOptions) },
+                    { field: "meter", headerName: "Meter", width: 120, headerAlign: "center", align: "center", editable: true, type: "number" },
+                    { field: "tp", headerName: "TP", width: 120, headerAlign: "center", align: "center", editable: true },
+                  ]}
+                  disableColumnMenu
+                  disableRowSelectionOnClick
+                  getRowId={(row) => row.id}
+                  rowHeight={48}
+                  columnHeaderHeight={52}
+                  editMode="cell"
+                  onCellEditCommit={(params) => {
+                    setSavedEntries((prev) => prev.map((r) => (r.id === params.id ? { ...r, [params.field]: params.value } : r)));
+                  }}
+                  processRowUpdate={(updatedRow) => {
+                    setSavedEntries((prev) => prev.map((r) => (r.id === updatedRow.id ? updatedRow : r)));
+                    return updatedRow;
+                  }}
+                  hideFooter
+                  sx={getTableStyles(theme, darkMode, sidenavColor)}
+                />
+              );
+            })()}
+          </div>
+        </ArgonBox>
+      )}
 
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: "12px" } }}>
+      <Dialog 
+        open={openPagesDialog} 
+        onClose={() => setOpenPagesDialog(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "12px" } }}
+      >
         <DialogTitle>
           <ArgonTypography variant="h5" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-            Add Production Entry
+            Pages
           </ArgonTypography>
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Page No.
-                </ArgonTypography>
-              </ArgonBox>
-              <ArgonInput fullWidth type="number" value={form.pageNo} onChange={(e) => handleFormChange("pageNo", e.target.value)} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Date & Time
-                </ArgonTypography>
-              </ArgonBox>
-              <ArgonInput fullWidth value={form.dateTime} onChange={(e) => handleFormChange("dateTime", e.target.value)} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Quality Name
-                </ArgonTypography>
-              </ArgonBox>
-              <FormControl fullWidth>
-                <Select value={form.qualityName} onChange={(e) => handleFormChange("qualityName", e.target.value)} displayEmpty sx={{ height: "42px" }}>
-                  <MenuItem value="">Select Quality</MenuItem>
-                  {qualities.map((q) => (
-                    <MenuItem key={q.id} value={q.qualityName}>{q.qualityName}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Taka No.
-                </ArgonTypography>
-              </ArgonBox>
-              <ArgonInput fullWidth type="number" value={form.takaNo} onChange={(e) => handleFormChange("takaNo", e.target.value)} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Total Taka
-                </ArgonTypography>
-              </ArgonBox>
-              <ArgonInput fullWidth type="number" value={form.totalTaka} onChange={(e) => handleFormChange("totalTaka", e.target.value)} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Meter
-                </ArgonTypography>
-              </ArgonBox>
-              <ArgonInput fullWidth type="number" value={form.meter} onChange={(e) => handleFormChange("meter", e.target.value)} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Total Meter
-                </ArgonTypography>
-              </ArgonBox>
-              <ArgonInput fullWidth type="number" value={form.totalMeter} onChange={(e) => handleFormChange("totalMeter", e.target.value)} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  Machine No.
-                </ArgonTypography>
-              </ArgonBox>
-              <FormControl fullWidth>
-                <Select value={form.machineNo} onChange={(e) => handleFormChange("machineNo", e.target.value)} displayEmpty sx={{ height: "42px" }}>
-                  <MenuItem value="">Select Machine</MenuItem>
-                  {machinesData.map((m) => (
-                    <MenuItem key={m.id} value={m.machineNumber}>{m.machineNumber}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ArgonBox mb={1}>
-                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
-                  TP
-                </ArgonTypography>
-              </ArgonBox>
-              <ArgonInput fullWidth value={form.tp} onChange={(e) => handleFormChange("tp", e.target.value)} placeholder="e.g., TP-A1" />
-            </Grid>
-          </Grid>
+          <div style={{ height: 360, width: "100%" }}>
+            {(() => {
+              const qualityOptions = qualities.map((q) => q.qualityName);
+              const machineOptions = (machinesData || []).map((m) => m.machineNumber);
+              const pagesMap = new Map();
+              savedEntries.forEach((e) => {
+                if (!pagesMap.has(e.pageNo)) pagesMap.set(e.pageNo, []);
+                pagesMap.get(e.pageNo).push(e);
+              });
+              const rows = Array.from(pagesMap.entries()).map(([page, list]) => ({
+                id: page,
+                pageNo: page,
+                entries: list.length,
+                qualityName: list[0]?.qualityName || "",
+                machineNo: list[0]?.machineNo || "",
+              }));
+              const renderSelectEditCell = (params, options) => (
+                <FormControl fullWidth>
+                  <Select
+                    value={params.value ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      params.api.setEditCellValue({ id: params.id, field: params.field, value: val });
+                      setSavedEntries((prev) => prev.map((r) => (String(r.pageNo) === String(params.id) ? { ...r, [params.field]: val } : r)));
+                    }}
+                    sx={{ height: 36 }}
+                  >
+                    {options.map((opt) => (
+                      <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              );
+              return (
+                <DataGrid
+                  rows={rows}
+                  columns={[
+                    { field: "pageNo", headerName: "Page No.", width: 120, headerAlign: "center", align: "center" },
+                    { field: "entries", headerName: "Entries", width: 120, headerAlign: "center", align: "center" },
+                    { field: "qualityName", headerName: "Quality", width: 180, headerAlign: "center", align: "center", editable: true, renderEditCell: (p) => renderSelectEditCell(p, qualityOptions) },
+                    { field: "machineNo", headerName: "Machine", width: 140, headerAlign: "center", align: "center", editable: true, renderEditCell: (p) => renderSelectEditCell(p, machineOptions) },
+                  ]}
+                  disableColumnMenu
+                  disableRowSelectionOnClick
+                  getRowId={(row) => row.id}
+                  rowHeight={48}
+                  columnHeaderHeight={52}
+                  onRowClick={(params) => {
+                    const pageRows = savedEntries.filter((se) => String(se.pageNo) === String(params.id));
+                    const first = pageRows[0];
+                    if (!first) return;
+                    setPageNo(String(first.pageNo));
+                    setDateTime(first.dateTime);
+                    setSelectedQuality(first.qualityName);
+                    setLastMachineNo(first.machineNo);
+                    setEntries(pageRows.map((r) => ({ takaNo: r.takaNo, meter: r.meter, tp: r.tp })));
+                    setCurrentPageStartTaka(pageRows[0]?.takaNo || 1);
+                    setEditingPageNo(first.pageNo);
+                    setOpenPagesDialog(false);
+                  }}
+                  hideFooter
+                  sx={getTableStyles(theme, darkMode, sidenavColor)}
+                />
+              );
+            })()}
+          </div>
         </DialogContent>
         <DialogActions>
-          <ArgonButton onClick={() => setOpenForm(false)} color="secondary" variant="outlined" sx={{ borderRadius: "8px" }}>
-            Cancel
-          </ArgonButton>
-          <ArgonButton onClick={handleFormSubmit} color="primary" variant="gradient" sx={{ borderRadius: "8px" }}>
-            <Icon sx={{ mr: 1 }}>save</Icon> Save
+          <ArgonButton 
+            onClick={() => setOpenPagesDialog(false)}
+            color="secondary" 
+            variant="outlined"
+            sx={{ borderRadius: "8px" }}
+          >
+            Close
           </ArgonButton>
         </DialogActions>
       </Dialog>
-    </>
+      <Snackbar
+        open={notifyOpen}
+        autoHideDuration={3000}
+        onClose={() => setNotifyOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert onClose={() => setNotifyOpen(false)} severity={notifySeverity} variant="filled" sx={{ borderRadius: 2 }}>
+          {notifyMessage}
+        </Alert>
+      </Snackbar>
+    </ArgonBox>
   );
 }
 
 ProductionEntry.propTypes = {
-  qualities: PropTypes.arrayOf(PropTypes.object).isRequired,
+  qualities: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      qualityName: PropTypes.string.isRequired,
+    })
+  ).isRequired,
 };
 
 export default ProductionEntry;
