@@ -17,6 +17,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import { useTheme } from "@mui/material/styles";
 
 import ArgonBox from "components/ArgonBox";
@@ -80,6 +82,13 @@ function MachineManagement() {
     otherStop: "", // (ne)
     totalStop: "", // (ne)
     beamNo: "", // (ne)
+    beamLength: "",
+    beamGetter: "",
+    danier: "",
+    krills: "",
+    pipeNumber: "",
+    isOutsourcing: false,
+    partyName: "Self Product",
     beamLoadingDateTime: "",
     remainingBeamMeter: "",
     motorKw: "5.5",
@@ -166,6 +175,34 @@ function MachineManagement() {
       field: "productionDay", 
       headerName: "Prod (Day)", 
       width: 110,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "powerOnTime", 
+      headerName: "Power On Time", 
+      width: 140,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "runningTime", 
+      headerName: "Running Time", 
+      width: 140,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "stopTime", 
+      headerName: "Stop Time", 
+      width: 120,
+      headerAlign: "center",
+      align: "center"
+    },
+    { 
+      field: "fillerTime", 
+      headerName: "Filler Stop", 
+      width: 120,
       headerAlign: "center",
       align: "center"
     },
@@ -387,6 +424,13 @@ function MachineManagement() {
       otherStop: "",
       totalStop: "",
       beamNo: "",
+      beamLength: "",
+      beamGetter: "",
+      danier: "",
+      krills: "",
+      pipeNumber: "",
+      isOutsourcing: false,
+      partyName: "Self Product",
       beamLoadingDateTime: "",
       remainingBeamMeter: "",
       motorKw: "5.5",
@@ -890,6 +934,117 @@ function MachineManagement() {
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <ArgonTypography variant="subtitle2" color="text">Beam Details</ArgonTypography>
+              <Divider sx={{ my: 1 }} />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Beam No.
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.beamNo} 
+                onChange={(e) => handleFormChange("beamNo", e.target.value)} 
+                placeholder="BM-004" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Beam Length
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number"
+                value={form.beamLength} 
+                onChange={(e) => handleFormChange("beamLength", e.target.value)} 
+                placeholder="1200" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Beam Getter
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.beamGetter} 
+                onChange={(e) => handleFormChange("beamGetter", e.target.value)} 
+                placeholder="John Doe" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Danier
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.danier} 
+                onChange={(e) => handleFormChange("danier", e.target.value)} 
+                placeholder="30D" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Krills
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                type="number"
+                value={form.krills} 
+                onChange={(e) => handleFormChange("krills", e.target.value)} 
+                placeholder="12" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" color="text">
+                  Pipe Number
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                value={form.pipeNumber} 
+                onChange={(e) => handleFormChange("pipeNumber", e.target.value)} 
+                placeholder="P-12" 
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <ArgonBox mb={1}>
+                <FormControlLabel
+                  control={
+                    <Checkbox 
+                      checked={form.isOutsourcing}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setForm((prev) => ({
+                          ...prev,
+                          isOutsourcing: checked,
+                          partyName: checked ? "" : "Self Product",
+                        }));
+                      }}
+                    />
+                  }
+                  label={<ArgonTypography variant="caption" fontWeight="bold" color="text">Outsourcing</ArgonTypography>}
+                />
+              </ArgonBox>
+              {form.isOutsourcing ? (
+                <ArgonInput 
+                  value={form.partyName} 
+                  onChange={(e) => handleFormChange("partyName", e.target.value)} 
+                  placeholder="Alpha Textiles Pvt Ltd" 
+                />
+              ) : (
+                <ArgonInput 
+                  value="Self Product" 
+                  disabled
+                />
+              )}
             </Grid>
             <Grid item xs={12} sm={6}>
               <ArgonBox mb={1}>

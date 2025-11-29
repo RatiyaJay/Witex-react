@@ -44,6 +44,17 @@ function StockManagement({ qualities }) {
     deliveryMeter: "",
   });
 
+  const [openReturn, setOpenReturn] = useState(false);
+  const [returnForm, setReturnForm] = useState({
+    qualityName: "",
+    companyName: "",
+    date: new Date().toISOString().slice(0, 10),
+    takaReturnTotal: "",
+    totalMeter: "",
+    remark: "",
+  });
+  const [returnRecords, setReturnRecords] = useState([]);
+
   useEffect(() => {
     setPage(0);
   }, []);
@@ -174,6 +185,51 @@ function StockManagement({ qualities }) {
     setOpenDelivery(false);
   };
 
+  const handleReturnClick = () => {
+    setReturnForm({
+      qualityName: "",
+      companyName: "",
+      date: new Date().toISOString().slice(0, 10),
+      takaReturnTotal: "",
+      totalMeter: "",
+      remark: "",
+    });
+    setOpenReturn(true);
+  };
+
+  const handleReturnFormChange = (key, value) => {
+    setReturnForm((f) => ({ ...f, [key]: value }));
+  };
+
+  const handleReturnSubmit = () => {
+    const { qualityName, takaReturnTotal, totalMeter } = returnForm;
+    const taka = Number(takaReturnTotal) || 0;
+    const meter = Number(totalMeter) || 0;
+    if (!qualityName) {
+      setOpenReturn(false);
+      return;
+    }
+
+    setRows((prev) => prev.map((r) => {
+      if (r.qualityName === qualityName) {
+        const newDeliveredTaka = Math.max(0, (r.deliveredTaka || 0) - taka);
+        const newDeliveredMeter = Math.max(0, (r.deliveredMeter || 0) - meter);
+        return {
+          ...r,
+          deliveredTaka: newDeliveredTaka,
+          deliveredMeter: newDeliveredMeter,
+          totalTaka: (r.oldTaka || 0) + (r.newTaka || 0) - newDeliveredTaka,
+          totalMeter: (r.oldMeter || 0) + (r.newMeter || 0) - newDeliveredMeter,
+        };
+      }
+      return r;
+    }));
+
+    const record = { id: Date.now(), ...returnForm };
+    setReturnRecords((prev) => [record, ...prev]);
+    setOpenReturn(false);
+  };
+
   const exportCsv = () => {
     const headers = [
       ["Quality Name", "qualityName"],
@@ -217,6 +273,14 @@ function StockManagement({ qualities }) {
                   sx={getExportButtonStyles(theme, sidenavColor)}
                 >
           <Icon sx={{ mr: 1 }}>local_shipping</Icon> Add Delivery
+        </ArgonButton>
+        <ArgonButton 
+          color={sidenavColor || "warning"}
+          variant="gradient"
+          onClick={handleReturnClick}
+          sx={{ ml: 1, ...getExportButtonStyles(theme, sidenavColor) }}
+        >
+          <Icon sx={{ mr: 1 }}>assignment_return</Icon> Return Stock
         </ArgonButton>
       </ArgonBox>
                 <div style={{ height: 480, width: "100%" }}>
@@ -379,6 +443,148 @@ function StockManagement({ qualities }) {
             }}
           >
             <Icon sx={{ mr: 1 }}>save</Icon> Add Delivery
+          </ArgonButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Return Stock Dialog */}
+      <Dialog 
+        open={openReturn} 
+        onClose={() => setOpenReturn(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "12px" }
+        }}
+      >
+        <DialogTitle>
+          <ArgonTypography variant="h5" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+            Return Stock Management
+          </ArgonTypography>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+            <Grid item xs={12}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                  Select Quality
+                </ArgonTypography>
+              </ArgonBox>
+              <FormControl fullWidth>
+                <Select 
+                  value={returnForm.qualityName} 
+                  onChange={(e) => handleReturnFormChange("qualityName", e.target.value)}
+                  displayEmpty
+                  sx={{ height: "42px" }}
+                >
+                  <MenuItem value="">Select Quality</MenuItem>
+                  {qualities.map((quality) => (
+                    <MenuItem key={quality.id} value={quality.qualityName}>
+                      {quality.qualityName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                  Company Name
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                fullWidth
+                value={returnForm.companyName}
+                onChange={(e) => handleReturnFormChange("companyName", e.target.value)}
+                placeholder="e.g., Alpha Textiles Pvt Ltd"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                  Date
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                fullWidth
+                type="date"
+                value={returnForm.date}
+                onChange={(e) => handleReturnFormChange("date", e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                  Taka Return Total
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                fullWidth
+                type="number"
+                value={returnForm.takaReturnTotal}
+                onChange={(e) => handleReturnFormChange("takaReturnTotal", e.target.value)}
+                placeholder="e.g., 200"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                  Total Meter
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                fullWidth
+                type="number"
+                value={returnForm.totalMeter}
+                onChange={(e) => handleReturnFormChange("totalMeter", e.target.value)}
+                placeholder="e.g., 85"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="caption" fontWeight="bold" sx={{ color: darkMode ? "#fff" : "inherit" }}>
+                  Remark
+                </ArgonTypography>
+              </ArgonBox>
+              <ArgonInput 
+                fullWidth
+                value={returnForm.remark}
+                onChange={(e) => handleReturnFormChange("remark", e.target.value)}
+                placeholder="Optional notes"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <ArgonButton 
+            onClick={() => setOpenReturn(false)} 
+            color="secondary" 
+            variant="outlined"
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+              },
+            }}
+          >
+            Cancel
+          </ArgonButton>
+          <ArgonButton 
+            onClick={handleReturnSubmit} 
+            color="primary" 
+            variant="gradient"
+            sx={{
+              borderRadius: "8px",
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)",
+              },
+            }}
+          >
+            <Icon sx={{ mr: 1 }}>save</Icon> Save Return
           </ArgonButton>
         </DialogActions>
       </Dialog>

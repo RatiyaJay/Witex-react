@@ -12,6 +12,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import Icon from "@mui/material/Icon";
 import { DataGrid } from "@mui/x-data-grid";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import FormControl from "@mui/material/FormControl";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
@@ -206,7 +209,6 @@ function YarnManagement() {
       ["Select Yarn Type", "yarnType"],
       ["LR No.", "lrNo"],
       ["Cartoon No.", "cartoonNo"],
-      ["Total Cartoon", "totalCartoon"],
       ["Total Cone", "totalCone"],
       ["Net Weight", "netWeight"],
       ["Truck No.", "truckNo"],
@@ -281,7 +283,8 @@ function YarnManagement() {
     { field: "challanDate", headerName: "Challan Date", width: 120, align: "center", headerAlign: "center" },
     { field: "challanNo", headerName: "Challan No.", width: 130, align: "center", headerAlign: "center" },
     { field: "qualityName", headerName: "Quality Name", flex: 1, minWidth: 150, align: "center", headerAlign: "center" },
-    { field: "totalCartoon", headerName: "Total Cartoon", width: 120, type: "number", align: "center", headerAlign: "center" },
+    { field: "grade", headerName: "Grade", width: 110, align: "center", headerAlign: "center" },
+    { field: "yarnType", headerName: "Yarn Type", width: 120, align: "center", headerAlign: "center" },
     { field: "warping", headerName: "Warping", width: 100, type: "number", align: "center", headerAlign: "center", 
       renderCell: (params) => params.value || 0 },
     { field: "twisting", headerName: "Twisting", width: 100, type: "number", align: "center", headerAlign: "center",
@@ -544,12 +547,24 @@ function YarnManagement() {
               </Grid>
               <Grid item xs={12} md={4}>
                 <ArgonTypography variant="caption" color="text">Select Grade</ArgonTypography>
-                <ArgonInput fullWidth placeholder="e.g., A" value={form.grade} onChange={handleFormChange("grade")} />
+                <FormControl fullWidth>
+                  <Select value={form.grade} onChange={handleFormChange("grade")} displayEmpty sx={{ height: "42px" }}>
+                    <MenuItem value="">Select</MenuItem>
+                    <MenuItem value="First">First</MenuItem>
+                    <MenuItem value="Second">Second</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
 
               <Grid item xs={12} md={4}>
                 <ArgonTypography variant="caption" color="text">Select Yarn Type</ArgonTypography>
-                <ArgonInput fullWidth placeholder="e.g., Polyester" value={form.yarnType} onChange={handleFormChange("yarnType")} />
+                <FormControl fullWidth>
+                  <Select value={form.yarnType} onChange={handleFormChange("yarnType")} displayEmpty sx={{ height: "42px" }}>
+                    <MenuItem value="">Select</MenuItem>
+                    <MenuItem value="Lim">Lim</MenuItem>
+                    <MenuItem value="Him">Him</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} md={4}>
                 <ArgonTypography variant="caption" color="text">LR No.</ArgonTypography>

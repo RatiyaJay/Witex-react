@@ -19,7 +19,7 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 
-import { qualityStockData } from "./data";
+import { stockManagementData } from "../mending-hub/data";
 import { useArgonController } from "context";
 import { 
   getTableStyles, 
@@ -33,7 +33,12 @@ function QualityStock() {
   const { darkMode, sidenavColor } = controller;
   const theme = useTheme();
   
-  const [rows, setRows] = useState(qualityStockData);
+  const [rows, setRows] = useState(() => stockManagementData.map((r, idx) => ({
+    id: idx + 1,
+    qualityName: r.qualityName,
+    totalTaka: r.totalTaka,
+    totalMeter: r.totalMeter,
+  })));
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
@@ -43,8 +48,6 @@ function QualityStock() {
     qualityName: "",
     totalTaka: "",
     totalMeter: "",
-    createdAt: "",
-    updatedAt: "",
   });
   const [editingId, setEditingId] = useState(null);
 
@@ -100,91 +103,10 @@ function QualityStock() {
       headerAlign: "center",
       align: "center"
     },
-    {
-      field: "createdAt",
-      headerName: "Created At",
-      minWidth: 180,
-      flex: 0.7,
-      headerAlign: "center",
-      align: "center",
-      valueFormatter: (params) => {
-        try { return new Date(params.value).toLocaleString(); } catch { return params.value; }
-      }
-    },
-    {
-      field: "updatedAt",
-      headerName: "Updated At",
-      minWidth: 180,
-      flex: 0.7,
-      headerAlign: "center",
-      align: "center",
-      valueFormatter: (params) => {
-        try { return new Date(params.value).toLocaleString(); } catch { return params.value; }
-      }
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 120,
-      sortable: false,
-      filterable: false,
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => (
-        <ArgonBox display="flex" justifyContent="center" width="100%" gap={0.5}>
-          <IconButton 
-            title="Edit" 
-            size="small" 
-            onClick={() => handleEdit(params.row)}
-            sx={{
-              borderRadius: "10px",
-              transition: "all 0.2s ease-in-out",
-              color: theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main,
-              "&:hover": {
-                transform: "scale(1.1)",
-                backgroundColor: darkMode 
-                  ? `${theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main}30`
-                  : `${theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main}20`,
-                boxShadow: `0 4px 12px ${theme.palette.gradients[sidenavColor]?.main || theme.palette.success.main}50`,
-              },
-            }}
-          >
-            <Icon fontSize="small">edit</Icon>
-          </IconButton>
-          <IconButton 
-            title="Delete" 
-            size="small" 
-            color="error" 
-            onClick={() => handleDeleteClick(params.row)}
-            sx={{
-              borderRadius: "10px",
-              transition: "all 0.2s ease-in-out",
-              "&:hover": {
-                transform: "scale(1.1)",
-                backgroundColor: darkMode ? "rgba(244, 67, 54, 0.2)" : "rgba(244, 67, 54, 0.12)",
-                boxShadow: "0 4px 12px rgba(244, 67, 54, 0.4)",
-              },
-            }}
-          >
-            <Icon fontSize="small">delete</Icon>
-          </IconButton>
-        </ArgonBox>
-      ),
-    },
+    
   ];
 
-  const handleAddClick = () => {
-    setFormMode("add");
-    setEditingId(null);
-    setForm({
-      qualityName: "",
-      totalTaka: "",
-      totalMeter: "",
-      createdAt: "",
-      updatedAt: "",
-    });
-    setOpenForm(true);
-  };
+  const handleAddClick = () => {};
 
   const handleEdit = (row) => {
     setFormMode("edit");
@@ -199,12 +121,9 @@ function QualityStock() {
 
   const handleFormSubmit = () => {
     if (formMode === "add") {
-      const newId = rows.length ? Math.max(...rows.map((r) => Number(r.id))) + 1 : 1;
-      const now = new Date().toISOString();
-      setRows((prev) => [{ id: newId, ...form, createdAt: now, updatedAt: now }, ...prev]);
+      return;
     } else if (formMode === "edit") {
-      const now = new Date().toISOString();
-      setRows((prev) => prev.map((r) => (r.id === editingId ? { ...r, ...form, updatedAt: now } : r)));
+      setRows((prev) => prev.map((r) => (r.id === editingId ? { ...r, ...form } : r)));
     }
     setOpenForm(false);
     setEditingId(null);
@@ -215,8 +134,6 @@ function QualityStock() {
       ["Quality Name", "qualityName"],
       ["Total Taka", "totalTaka"],
       ["Total Meter", "totalMeter"],
-      ["Created At", "createdAt"],
-      ["Updated At", "updatedAt"],
     ];
     const escape = (v) => {
       const s = String(v ?? "");
@@ -248,14 +165,6 @@ function QualityStock() {
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <ArgonTypography variant="h4">InHouse Quality Stock</ArgonTypography>
               <ArgonBox display="flex" gap={1}>
-                <ArgonButton 
-                  color={sidenavColor || "warning"} 
-                  variant="gradient" 
-                  onClick={handleAddClick}
-                  sx={getExportButtonStyles(theme, sidenavColor)}
-                >
-                  <Icon sx={{ mr: 1 }}>add</Icon> Add Quality
-                </ArgonButton>
                 <ArgonButton 
                   color={sidenavColor || "warning"}
                   variant="gradient" 

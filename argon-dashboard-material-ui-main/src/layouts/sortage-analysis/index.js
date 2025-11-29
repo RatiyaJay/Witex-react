@@ -119,23 +119,6 @@ function SortageAnalysis() {
       renderCell: (params) => `${params.value}m`,
     },
     { 
-      field: "shortageMeter", 
-      headerName: "Shortage (Meter)", 
-      width: 150,
-      type: "number",
-      align: "center",
-      headerAlign: "center",
-      renderCell: (params) => {
-        const value = params.value || 0;
-        const color = value > 100 ? "#f44336" : value > 50 ? "#ff9800" : "#4caf50";
-        return (
-          <ArgonTypography fontWeight="bold" sx={{ color }}>
-            {value.toFixed(2)}m
-          </ArgonTypography>
-        );
-      },
-    },
-    { 
       field: "totalFoldingTaka", 
       headerName: "Folding Taka", 
       width: 130,
@@ -176,6 +159,23 @@ function SortageAnalysis() {
         );
       },
     },
+    { 
+      field: "shortageMeter", 
+      headerName: "Shortage (Meter)", 
+      width: 150,
+      type: "number",
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        const value = params.value || 0;
+        const color = value > 100 ? "#f44336" : value > 50 ? "#ff9800" : "#4caf50";
+        return (
+          <ArgonTypography fontWeight="bold" sx={{ color }}>
+            {value.toFixed(2)}m
+          </ArgonTypography>
+        );
+      },
+    },
   ];
 
   const exportCsv = () => {
@@ -187,8 +187,8 @@ function SortageAnalysis() {
       ["Remaining Beam Meter", "remainingMeter"],
       ["Folding Taka", "totalFoldingTaka"],
       ["Folding Meter", "totalFoldingMeter"],
-      ["Shortage (Meter)", "shortageMeter"],
       ["Shortage %", "shortagePercentage"],
+      ["Shortage (Meter)", "shortageMeter"],
     ];
     
     const escape = (v) => {
