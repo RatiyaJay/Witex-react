@@ -1,0 +1,26 @@
+export const twistingData = [
+  {
+    id: 1,
+    date: "2025-11-10",
+    tpmNo: "TPM-001",
+    temperature: 28,
+    durationMinutes: 45,
+    sRoll: 120,
+    zRoll: 110,
+    yarnWeight: 25.5,
+    qualityName: "Combed Cotton 40s",
+    density: 1.25,
+  },
+  {
+    id: 2,
+    date: "2025-11-11",
+    tpmNo: "TPM-002",
+    temperature: 30,
+    durationMinutes: 60,
+    sRoll: 130,
+    zRoll: 115,
+    yarnWeight: 26.1,
+    qualityName: "Poly-Cotton 30/1",
+    density: 1.18,
+  },
+];

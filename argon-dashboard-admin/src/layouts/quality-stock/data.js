@@ -1,0 +1,42 @@
+export const qualityStockData = [
+  {
+    id: 1,
+    qualityName: "SuperSoft 30D",
+    totalTaka: 15000,
+    totalMeter: 1200,
+    createdAt: "2025-11-20T09:15:00",
+    updatedAt: "2025-11-26T17:40:00",
+  },
+  {
+    id: 2,
+    qualityName: "PrimeWeft 25D",
+    totalTaka: 12500,
+    totalMeter: 980,
+    createdAt: "2025-11-19T14:10:00",
+    updatedAt: "2025-11-26T17:30:00",
+  },
+  {
+    id: 3,
+    qualityName: "ComfortWeave 40D",
+    totalTaka: 18000,
+    totalMeter: 1450,
+    createdAt: "2025-11-18T11:05:00",
+    updatedAt: "2025-11-26T14:20:00",
+  },
+  {
+    id: 4,
+    qualityName: "UltraWeave 35D",
+    totalTaka: 16800,
+    totalMeter: 1320,
+    createdAt: "2025-11-17T10:00:00",
+    updatedAt: "2025-11-25T19:00:00",
+  },
+  {
+    id: 5,
+    qualityName: "BasicWeave 20D",
+    totalTaka: 9500,
+    totalMeter: 750,
+    createdAt: "2025-11-16T08:30:00",
+    updatedAt: "2025-11-24T12:10:00",
+  },
+];

@@ -43,6 +43,7 @@ import createCache from "@emotion/cache";
 
 // Argon Dashboard 2 MUI routes
 import routes from "routes";
+import { getToken, isSuperAdmin } from "utils/auth";
 
 // Argon Dashboard 2 MUI contexts
 import { useArgonController, setMiniSidenav, setOpenConfigurator } from "context";
@@ -144,7 +145,7 @@ export default function App() {
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
-        {layout === "dashboard" && (
+        {layout === "dashboard" && pathname !== "/login" && (
           <>
             <Sidenav
               color={sidenavColor}
@@ -161,14 +162,14 @@ export default function App() {
         {layout === "vr" && <Configurator />}
         <Routes>
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to={getToken() && isSuperAdmin() ? "/dashboard" : "/login"} />} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
   ) : (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
-      {layout === "dashboard" && (
+      {layout === "dashboard" && pathname !== "/login" && (
         <>
           <Sidenav
             color={sidenavColor}
@@ -185,7 +186,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to={getToken() && isSuperAdmin() ? "/dashboard" : "/login"} />} />
       </Routes>
     </ThemeProvider>
   );

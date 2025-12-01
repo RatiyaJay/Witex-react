@@ -16,7 +16,7 @@ Coded by www.creative-tim.com
 import { useState, useEffect } from "react";
 
 // react-router components
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
@@ -32,6 +32,7 @@ import Icon from "@mui/material/Icon";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 import ArgonInput from "components/ArgonInput";
+import { getUser } from "utils/auth";
 
 // Argon Dashboard 2 MUI example components
 import Breadcrumbs from "examples/Breadcrumbs";
@@ -65,6 +66,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator } = controller;
   const [openMenu, setOpenMenu] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
+  const user = getUser();
 
   useEffect(() => {
     // Setting the navbar type
@@ -161,34 +163,25 @@ function DashboardNavbar({ absolute, light, isMini }) {
         {isMini ? null : (
           <ArgonBox sx={(theme) => navbarRow(theme, { isMini })}>
             <ArgonBox pr={1}>
-              <ArgonInput
-                placeholder="Type here..."
-                startAdornment={
-                  <Icon fontSize="small" style={{ marginRight: "6px" }}>
-                    search
-                  </Icon>
-                }
-              />
+              <ArgonInput placeholder="Type here..." startAdornment={<Icon fontSize="small" style={{ marginRight: "6px" }}>search</Icon>} />
             </ArgonBox>
             <ArgonBox color={light ? "white" : "inherit"}>
-              <Link to="/authentication/sign-in/basic">
-                <IconButton sx={navbarIconButton} size="small">
-                  <Icon
-                    sx={({ palette: { dark, white } }) => ({
-                      color: light && transparentNavbar ? white.main : dark.main,
-                    })}
-                  >
-                    account_circle
-                  </Icon>
-                  <ArgonTypography
-                    variant="button"
-                    fontWeight="medium"
-                    color={light && transparentNavbar ? "white" : "dark"}
-                  >
-                    Sign in
-                  </ArgonTypography>
-                </IconButton>
-              </Link>
+              <IconButton sx={navbarIconButton} size="small">
+                <Icon
+                  sx={({ palette: { dark, white } }) => ({
+                    color: light && transparentNavbar ? white.main : dark.main,
+                  })}
+                >
+                  account_circle
+                </Icon>
+                <ArgonTypography
+                  variant="button"
+                  fontWeight="medium"
+                  color={light && transparentNavbar ? "white" : "dark"}
+                >
+                  {user?.email || "Super Admin"}
+                </ArgonTypography>
+              </IconButton>
               <IconButton
                 size="small"
                 color={light && transparentNavbar ? "white" : "dark"}

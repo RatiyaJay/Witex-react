@@ -1,0 +1,52 @@
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const { json } = require("body-parser");
+const { ApolloServer } = require("@apollo/server");
+const { expressMiddleware } = require("@apollo/server/express4");
+const { ApolloServerPluginLandingPageLocalDefault } = require("@apollo/server/plugin/landingPage/default");
+
+const { typeDefs, resolvers } = require("./graphql/schema");
+const sequelize = require("./db/sequelize");
+const { authContext } = require("./utils/auth");
+
+const app = express();
+const corsOrigins = (process.env.CORS_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+const corsOptions = {
+  origin: corsOrigins.length ? corsOrigins : true,
+  credentials: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+app.use(json());
+
+async function start() {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    plugins: [ApolloServerPluginLandingPageLocalDefault()],
+  });
+
+  await server.start();
+  app.use(
+    "/graphql",
+    expressMiddleware(server, {
+      context: async ({ req }) => authContext(req),
+    })
+  );
+
+  const port = process.env.PORT || 4000;
+  app.listen(port, async () => {
+    try {
+      await sequelize.authenticate();
+      console.log("✅ DB Connected");
+    } catch (err) {
+      console.error("❌ DB Error:", err);
+    }
+    console.log(`🚀 GraphQL ready at http://localhost:${port}/graphql`);
+  });
+}
+
+start();

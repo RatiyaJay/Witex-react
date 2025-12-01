@@ -67,6 +67,8 @@ import Feedback from "layouts/feedback";
 import PrivacyPolicy from "layouts/privacy-policy";
 import ContactUs from "layouts/contact-us";
 import Logout from "layouts/logout";
+import Login from "layouts/login";
+import UserManagement from "layouts/user-management";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
@@ -135,6 +137,10 @@ const routes = [
   { type: "route", name: "Privacy Policy", key: "privacy-policy", route: "/privacy-policy", icon: "privacy_tip", component: <PrivacyPolicy /> },
   { type: "route", name: "Contact Us", key: "contact-us", route: "/contact-us", icon: "contact_support", component: <ContactUs /> },
   { type: "route", name: "Logout", key: "logout", route: "/logout", icon: "logout", component: <Logout /> },
+  // Hidden
+  { type: "hidden", key: "login", route: "/login", component: <Login /> },
+  // Admin-only
+  { type: "route", name: "User Management", key: "user-management", route: "/user-management", icon: "supervised_user_circle", component: <UserManagement /> },
 ];
 
 export default routes;
