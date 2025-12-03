@@ -1,13 +1,38 @@
 const typeDefs = `
-  enum Role { SUPER_ADMIN USER }
+  enum Role { SUPER_ADMIN ADMIN OWNER SUPERVISOR MASTER CEO FITTER OPERATOR WARPER USER }
 
   type User {
     id: ID!
+    name: String
     email: String!
+    contactNo: String
+    organization: String
+    organizationId: ID
     role: Role!
     isActive: Boolean!
     createdAt: String!
     updatedAt: String!
+  }
+
+  input CreateUserInput {
+    name: String
+    email: String!
+    contactNo: String
+    organization: String
+    password: String!
+    role: Role!
+    isActive: Boolean
+    organizationId: ID
+  }
+
+  input UpdateUserInput {
+    name: String
+    email: String
+    contactNo: String
+    organization: String
+    organizationId: ID
+    role: Role
+    isActive: Boolean
   }
 
   type AuthPayload { token: String!, user: User! }

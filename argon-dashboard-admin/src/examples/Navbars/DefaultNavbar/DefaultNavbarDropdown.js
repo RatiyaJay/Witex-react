@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 // @mui material components
 import Collapse from "@mui/material/Collapse";
 import Icon from "@mui/material/Icon";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
@@ -36,6 +37,7 @@ function DefaultNavbarDropdown({
   href,
   route,
   collapse,
+  onCloseCollapse,
   ...rest
 }) {
   const linkComponent = {
@@ -51,49 +53,51 @@ function DefaultNavbarDropdown({
   };
 
   return (
-    <>
-      <ArgonBox
-        {...rest}
-        mx={0.5}
-        p={1}
-        display="flex"
-        alignItems="baseline"
-        color={light ? "white" : "dark"}
-        sx={{ cursor: "pointer", userSelect: "none" }}
-        {...(route && routeComponent)}
-        {...(href && linkComponent)}
-      >
-        {icon && (
-          <ArgonTypography
-            variant="body2"
-            lineHeight={1}
-            color="inherit"
-            sx={{ alignSelf: "center", "& *": { verticalAlign: "middle" } }}
-          >
-            {icon}
-          </ArgonTypography>
-        )}
-        <ArgonTypography
-          variant="button"
-          fontWeight="regular"
-          textTransform="capitalize"
+    <ClickAwayListener onClickAway={onCloseCollapse}>
+      <ArgonBox>
+        <ArgonBox
+          {...rest}
+          mx={0.5}
+          p={1}
+          display="flex"
+          alignItems="baseline"
           color={light ? "white" : "dark"}
-          sx={{ fontWeight: "100%", ml: 1, mr: 0.25 }}
+          sx={{ cursor: "pointer", userSelect: "none" }}
+          {...(route && routeComponent)}
+          {...(href && linkComponent)}
         >
-          {name}
-        </ArgonTypography>
-        <ArgonTypography variant="body2" color={light ? "white" : "dark"} ml="auto">
-          <Icon sx={{ fontWeight: "normal", verticalAlign: "middle" }}>
-            {collapse && "keyboard_arrow_down"}
-          </Icon>
-        </ArgonTypography>
+          {icon && (
+            <ArgonTypography
+              variant="body2"
+              lineHeight={1}
+              color="inherit"
+              sx={{ alignSelf: "center", "& *": { verticalAlign: "middle" } }}
+            >
+              {icon}
+            </ArgonTypography>
+          )}
+          <ArgonTypography
+            variant="button"
+            fontWeight="regular"
+            textTransform="capitalize"
+            color={light ? "white" : "dark"}
+            sx={{ fontWeight: "100%", ml: 1, mr: 0.25 }}
+          >
+            {name}
+          </ArgonTypography>
+          <ArgonTypography variant="body2" color={light ? "white" : "dark"} ml="auto">
+            <Icon sx={{ fontWeight: "normal", verticalAlign: "middle" }}>
+              {collapse && "keyboard_arrow_down"}
+            </Icon>
+          </ArgonTypography>
+        </ArgonBox>
+        {children && (
+          <Collapse in={Boolean(collapseStatus)} timeout={400} unmountOnExit>
+            {children}
+          </Collapse>
+        )}
       </ArgonBox>
-      {children && (
-        <Collapse in={Boolean(collapseStatus)} timeout={400} unmountOnExit>
-          {children}
-        </Collapse>
-      )}
-    </>
+    </ClickAwayListener>
   );
 }
 
@@ -117,6 +121,7 @@ DefaultNavbarDropdown.propTypes = {
   href: PropTypes.string,
   route: PropTypes.string,
   collapse: PropTypes.bool.isRequired,
+  onCloseCollapse: PropTypes.func,
 };
 
 export default DefaultNavbarDropdown;

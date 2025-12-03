@@ -9,6 +9,7 @@ const { ApolloServerPluginLandingPageLocalDefault } = require("@apollo/server/pl
 const { typeDefs, resolvers } = require("./graphql/schema");
 const sequelize = require("./db/sequelize");
 const { authContext } = require("./utils/auth");
+const { ensureIndex } = require('./utils/search');
 
 const app = express();
 const corsOrigins = (process.env.CORS_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
@@ -44,6 +45,12 @@ async function start() {
       console.log("✅ DB Connected");
     } catch (err) {
       console.error("❌ DB Error:", err);
+    }
+    try {
+      await ensureIndex('users');
+      console.log('🔎 Elasticsearch index ready');
+    } catch (e) {
+      console.warn('⚠️ Elasticsearch not reachable or index ensure failed');
     }
     console.log(`🚀 GraphQL ready at http://localhost:${port}/graphql`);
   });

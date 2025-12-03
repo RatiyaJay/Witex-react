@@ -25,6 +25,7 @@ import { Link } from "react-router-dom";
 import Collapse from "@mui/material/Collapse";
 import MuiLink from "@mui/material/Link";
 import Icon from "@mui/material/Icon";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
@@ -36,7 +37,7 @@ import DefaultNavbarDropdown from "examples/Navbars/DefaultNavbar/DefaultNavbarD
 // Argon Dashboard 2 PRO React contexts
 import { useArgonController } from "context";
 
-function DefaultNavbarMobile({ routes, open }) {
+function DefaultNavbarMobile({ routes, open, close }) {
   const [collapse, setCollapse] = useState("");
   const [controller] = useArgonController();
   const { darkMode } = controller;
@@ -54,6 +55,7 @@ function DefaultNavbarMobile({ routes, open }) {
         href={href}
         route={route}
         collapse={Boolean(navCollapse)}
+        onCloseCollapse={() => setCollapse(false)}
       >
         <ArgonBox sx={{ height: "15rem", maxHeight: "15rem", overflowY: "scroll" }}>
           {routeCollapses &&
@@ -195,11 +197,18 @@ function DefaultNavbarMobile({ routes, open }) {
   );
 
   return (
-    <Collapse in={Boolean(open)} timeout="auto" unmountOnExit>
-      <ArgonBox width="calc(100% + 1.625rem)" my={2} ml={-2}>
-        {renderNavbarItems}
-      </ArgonBox>
-    </Collapse>
+    <ClickAwayListener
+      onClickAway={() => {
+        setCollapse(false);
+        if (typeof close === "function") close();
+      }}
+    >
+      <Collapse in={Boolean(open)} timeout="auto" unmountOnExit>
+        <ArgonBox width="calc(100% + 1.625rem)" my={2} ml={-2}>
+          {renderNavbarItems}
+        </ArgonBox>
+      </Collapse>
+    </ClickAwayListener>
   );
 }
 
@@ -207,6 +216,7 @@ function DefaultNavbarMobile({ routes, open }) {
 DefaultNavbarMobile.propTypes = {
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
   open: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
+  close: PropTypes.func,
 };
 
 export default DefaultNavbarMobile;

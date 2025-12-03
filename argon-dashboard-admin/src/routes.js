@@ -69,6 +69,8 @@ import ContactUs from "layouts/contact-us";
 import Logout from "layouts/logout";
 import Login from "layouts/login";
 import UserManagement from "layouts/user-management";
+import OrganizationManagement from "layouts/organization-management";
+import WhatsappManagement from "layouts/whatsapp-management";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
@@ -140,6 +142,8 @@ const routes = [
   // Hidden Login, not shown in sidenav
   { type: "hidden", key: "login", route: "/login", component: <Login /> },
   { type: "route", name: "User Management", key: "user-management", route: "/user-management", icon: "supervised_user_circle", component: <UserManagement /> },
+  { type: "route", name: "Organization Management", key: "organization-management", route: "/organization-management", icon: "domain", component: <OrganizationManagement /> },
+  { type: "route", name: "WhatsApp Management", key: "whatsapp-management", route: "/whatsapp-management", icon: "chat", component: <WhatsappManagement /> },
 ];
 
 export default routes;
