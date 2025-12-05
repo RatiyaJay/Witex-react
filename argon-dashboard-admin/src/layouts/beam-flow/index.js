@@ -310,7 +310,7 @@ function BeamFlow() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <ArgonTypography variant="h4">Beam Management</ArgonTypography>
+              <ArgonTypography variant="h4" fontWeight="bold" color={darkMode ? "white" : "dark"}>Beam Management</ArgonTypography>
               <ArgonBox display="flex" gap={1}>
                 <ArgonButton 
                   color={sidenavColor || "warning"} 

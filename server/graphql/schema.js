@@ -10,20 +10,25 @@ const { resolvers: organizationMutationResolvers, typeDefs: organizationMutation
 const { typeDefs: whatsappTypes } = require('./types/whatsapp');
 const { resolvers: whatsappQueryResolvers, typeDefs: whatsappQueryTypes } = require('./queries/whatsapp');
 const { resolvers: whatsappMutationResolvers, typeDefs: whatsappMutationTypes } = require('./mutations/whatsapp');
+const { typeDefs: deviceTypes } = require('./types/device');
+const { resolvers: deviceQueryResolvers, typeDefs: deviceQueryTypes } = require('./queries/device');
+const { resolvers: deviceMutationResolvers, typeDefs: deviceMutationTypes } = require('./mutations/device');
 
-const typeDefs = [baseTypes, userTypes, organizationTypes, whatsappTypes, userQueryTypes, organizationQueryTypes, whatsappQueryTypes, mutationTypes, userMutationTypes, organizationMutationTypes, whatsappMutationTypes].join('\n');
+const typeDefs = [baseTypes, userTypes, organizationTypes, whatsappTypes, deviceTypes, userQueryTypes, organizationQueryTypes, whatsappQueryTypes, deviceQueryTypes, mutationTypes, userMutationTypes, organizationMutationTypes, whatsappMutationTypes, deviceMutationTypes].join('\n');
 const resolvers = {
   Query: {
     ...helloResolvers.Query,
     ...userQueryResolvers.Query,
     ...organizationQueryResolvers.Query,
     ...whatsappQueryResolvers.Query,
+    ...deviceQueryResolvers.Query,
   },
   Mutation: {
     ...mutationResolvers.Mutation,
     ...userMutationResolvers.Mutation,
     ...organizationMutationResolvers.Mutation,
     ...whatsappMutationResolvers.Mutation,
+    ...deviceMutationResolvers.Mutation,
   },
 };
 

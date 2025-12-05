@@ -145,7 +145,7 @@ export default function App() {
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
-        {layout === "dashboard" && pathname !== "/login" && (
+        {layout === "dashboard" && (
           <>
             <Sidenav
               color={sidenavColor}
@@ -162,14 +162,14 @@ export default function App() {
         {layout === "vr" && <Configurator />}
         <Routes>
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to={getToken() && isSuperAdmin() ? "/dashboard" : "/login"} />} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
   ) : (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
-      {layout === "dashboard" && pathname !== "/login" && (
+      {layout === "dashboard" && (
         <>
           <Sidenav
             color={sidenavColor}
@@ -186,7 +186,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to={getToken() && isSuperAdmin() ? "/dashboard" : "/login"} />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </ThemeProvider>
   );

@@ -216,6 +216,17 @@ function Home() {
       return "#31C950";
     };
     
+    const getCardBgLight = () => {
+      if (machine.causeOfError === "Machine Stop") return "#F5E6E8";
+      if (machine.causeOfError && machine.causeOfError.toLowerCase().includes("bhidan")) return "#FFF9E6";
+      const eff = machine.efficiency || 0;
+      if (eff < 50) return "#FFE6E6";
+      if (eff < 65) return "#FFE8E0";
+      if (eff < 80) return "#F9E6FD";
+      if (eff < 90) return "#E6F0FF";
+      return "#E8F9EC";
+    };
+    
     MachineCard.propTypes = {
       machine: PropTypes.shape({
         machineNumber: PropTypes.string.isRequired,
@@ -237,11 +248,11 @@ function Home() {
       <Card
         sx={{
           height: "100%",
-          minHeight: compact ? "220px" : "240px",
+          minHeight: compact ? "180px" : "190px",
           display: "flex",
           flexDirection: "column",
-          background: getCardBg(),
-          borderRadius: "12px",
+          background: darkMode ? "#1a2332" : getCardBgLight(),
+          borderRadius: "8px",
           boxShadow: darkMode
             ? "0 4px 16px rgba(0, 0, 0, 0.4)"
             : "0 4px 16px rgba(0, 0, 0, 0.08)",
@@ -249,8 +260,8 @@ function Home() {
             ? "1px solid rgba(255, 255, 255, 0.15)"
             : "1px solid #d0d7de",
           borderLeft: `4px solid ${leftBorderColor}`,
-          p: compact ? 1 : 1.25,
-          pb: compact ? 1.25 : 1.75,
+          p: compact ? 0.6 : 0.8,
+          pb: compact ? 0.8 : 1,
           transition: "all 0.3s ease",
           "&:hover": {
             transform: "translateY(-1px)",
@@ -258,76 +269,50 @@ function Home() {
               ? "0 8px 24px rgba(0, 0, 0, 0.6)"
               : "0 8px 24px rgba(0, 0, 0, 0.12)",
           },
-          color: "#fff",
           overflow: "hidden",
         }}
       >
-        <ArgonBox mb={1}>
-          <ArgonBox display="flex" justifyContent="flex-start" alignItems="center">
+        <ArgonBox mb={0.6}>
+          <ArgonBox display="flex" justifyContent="space-between" alignItems="flex-start" gap={0.6}>
             <ArgonBox
               sx={{
-                background: "rgba(255, 255, 255, 0.22)",
-                border: "1px solid rgba(255, 255, 255, 0.35)",
-                borderRadius: "10px",
-                px: compact ? 1 : 1.25,
-                py: compact ? 0.5 : 0.75,
-                minWidth: { xs: "auto", sm: "115px" },
-                backdropFilter: "saturate(180%) blur(2px)",
+                background: getCardBg(),
+                borderRadius: "6px",
+                px: compact ? 0.6 : 0.8,
+                py: compact ? 0.3 : 0.5,
+                minWidth: { xs: "70px", sm: "85px" },
+                maxWidth: "50%",
               }}
             >
-              <ArgonTypography variant="h5" fontWeight="bold" color="white" mt={0.25} sx={{ fontSize: compact ? "1rem" : "1.25rem" }}>
+              <ArgonTypography variant="h5" fontWeight="bold" color="white" sx={{ fontSize: compact ? "0.9rem" : "1rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {machine.machineNumber}
               </ArgonTypography>
-              <ArgonBox mt={0.5} display="flex" gap={0.75} alignItems="center">
+              <ArgonBox mt={0.2} display="flex" gap={0.4} alignItems="center">
                 <Tooltip title="WiFi" arrow placement="top">
-                  <Icon sx={{ color: "#e0f2fe", fontSize: compact ? "16px" : "18px" }}>wifi</Icon>
+                  <Icon sx={{ color: "#e0f2fe", fontSize: compact ? "12px" : "14px" }}>wifi</Icon>
                 </Tooltip>
                 {beam && (
                   <Tooltip title={`Beam ${beam.beamNo}`} arrow placement="top">
-                    <Icon sx={{ color: "#e0f2fe", fontSize: compact ? "16px" : "18px" }}>settings_input_antenna</Icon>
+                    <Icon sx={{ color: "#e0f2fe", fontSize: compact ? "12px" : "14px" }}>settings_input_antenna</Icon>
                   </Tooltip>
                 )}
                 {hasError && (
                   <Tooltip title={machine.causeOfError} arrow placement="top">
-                    <Icon sx={{ color: "#f44336", fontSize: compact ? "16px" : "18px" }}>{getCauseOfErrorIcon(machine.causeOfError)}</Icon>
+                    <Icon sx={{ color: "#f44336", fontSize: compact ? "12px" : "14px" }}>{getCauseOfErrorIcon(machine.causeOfError)}</Icon>
                   </Tooltip>
                 )}
               </ArgonBox>
             </ArgonBox>
-            <ArgonBox ml={1} display="flex" alignItems="flex-end" flexDirection="column" gap={0.6}>
-              <ArgonBox
-                display="flex"
-                alignItems="center"
-                gap={0.5}
-                sx={{
-                  background: "rgba(255,255,255,0.22)",
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  borderRadius: "10px",
-                  px: compact ? 0.6 : 0.75,
-                  py: compact ? 0.2 : 0.25,
-                  width: { xs: "100%", sm: 110 },
-                }}
-              >
-                <Icon sx={{ color: "#ffffff", opacity: 0.95, fontSize: compact ? "16px" : "18px" }}>trending_up</Icon>
-                <ArgonTypography variant="h6" fontWeight="bold" color="white" fontSize={compact ? "0.85rem" : "0.95rem"}>
+            <ArgonBox display="flex" alignItems="flex-end" flexDirection="column" gap={0.4}>
+              <ArgonBox display="flex" alignItems="center" gap={0.3}>
+                <Icon sx={{ color: darkMode ? "#fff" : "#333", fontSize: compact ? "12px" : "14px" }}>trending_up</Icon>
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize={compact ? "0.85rem" : "0.95rem"} sx={{ whiteSpace: "nowrap" }}>
                   {machine.efficiency}%
                 </ArgonTypography>
               </ArgonBox>
-              <ArgonBox
-                display="flex"
-                alignItems="center"
-                gap={0.5}
-                sx={{
-                  background: "rgba(255,255,255,0.22)",
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  borderRadius: "10px",
-                  px: compact ? 0.6 : 0.75,
-                  py: compact ? 0.2 : 0.25,
-                  width: { xs: "100%", sm: 110 },
-                }}
-              >
-                <Icon sx={{ color: "#ffffff", fontSize: compact ? "16px" : "18px" }}>speed</Icon>
-                <ArgonTypography variant="h6" fontWeight="bold" color="white" fontSize={compact ? "0.85rem" : "0.95rem"}>
+              <ArgonBox display="flex" alignItems="center" gap={0.3}>
+                <Icon sx={{ color: darkMode ? "#fff" : "#333", fontSize: compact ? "12px" : "14px" }}>speed</Icon>
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize={compact ? "0.85rem" : "0.95rem"} sx={{ whiteSpace: "nowrap" }}>
                   {machine.rpm}
                 </ArgonTypography>
               </ArgonBox>
@@ -335,15 +320,18 @@ function Home() {
           </ArgonBox>
         </ArgonBox>
 
-        <Grid container spacing={0.8}>
+        <Grid container spacing={0.4}>
           <Grid item xs={12}>
             <Tooltip title="Quality Name" arrow placement="top">
-              <ArgonBox
-                p={0.4}
-                borderRadius="8px"
-                sx={{ cursor: "pointer" }}
-              >
-                <ArgonTypography variant="body2" fontWeight="bold" color="white" fontSize={compact ? "0.85rem" : "0.9rem"} textAlign="center">
+              <ArgonBox py={0.2}>
+                <ArgonTypography 
+                  variant="body2" 
+                  fontWeight="bold" 
+                  color={darkMode ? "white" : "dark"} 
+                  fontSize={compact ? "0.75rem" : "0.8rem"} 
+                  textAlign="center"
+                  sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
                   {machine.qualityName}
                 </ArgonTypography>
               </ArgonBox>
@@ -351,12 +339,8 @@ function Home() {
           </Grid>
           <Grid item xs={6}>
             <Tooltip title="Pick" arrow placement="top">
-              <ArgonBox
-                p={0.4}
-                borderRadius="8px"
-                sx={{ cursor: "pointer" }}
-              >
-                <ArgonTypography variant="h6" fontWeight="bold" color="white" fontSize={compact ? "0.9rem" : "0.95rem"} textAlign="center">
+              <ArgonBox py={0.2}>
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize={compact ? "0.8rem" : "0.85rem"} textAlign="center">
                   {machine.pick}
                 </ArgonTypography>
               </ArgonBox>
@@ -364,12 +348,15 @@ function Home() {
           </Grid>
           <Grid item xs={6}>
             <Tooltip title="Current / Total Stoppage" arrow placement="top">
-              <ArgonBox
-                p={0.4}
-                borderRadius="8px"
-                sx={{ cursor: "pointer" }}
-              >
-                <ArgonTypography variant="h6" fontWeight="bold" color="white" fontSize={compact ? "0.9rem" : "0.95rem"} textAlign="center">
+              <ArgonBox py={0.2}>
+                <ArgonTypography 
+                  variant="h6" 
+                  fontWeight="bold" 
+                  color={darkMode ? "white" : "dark"} 
+                  fontSize={compact ? "0.8rem" : "0.85rem"} 
+                  textAlign="center"
+                  sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
                   {machine.current}/{machine.totalStop}
                 </ArgonTypography>
               </ArgonBox>
@@ -377,12 +364,15 @@ function Home() {
           </Grid>
           <Grid item xs={6}>
             <Tooltip title="Running Time" arrow placement="top">
-              <ArgonBox
-                p={0.4}
-                borderRadius="8px"
-                sx={{ cursor: "pointer" }}
-              >
-                <ArgonTypography variant="body2" fontWeight="bold" color="white" fontSize={compact ? "0.8rem" : "0.85rem"} textAlign="center">
+              <ArgonBox py={0.2}>
+                <ArgonTypography 
+                  variant="body2" 
+                  fontWeight="bold" 
+                  color={darkMode ? "white" : "dark"} 
+                  fontSize={compact ? "0.7rem" : "0.75rem"} 
+                  textAlign="center"
+                  sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
                   {machine.runningTime}
                 </ArgonTypography>
               </ArgonBox>
@@ -390,12 +380,8 @@ function Home() {
           </Grid>
           <Grid item xs={6}>
             <Tooltip title="Shift Production" arrow placement="top">
-              <ArgonBox
-                p={0.4}
-                borderRadius="8px"
-                sx={{ cursor: "pointer" }}
-              >
-                <ArgonTypography variant="h6" fontWeight="bold" color="white" fontSize={compact ? "0.9rem" : "0.95rem"} textAlign="center">
+              <ArgonBox py={0.2}>
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize={compact ? "0.8rem" : "0.85rem"} textAlign="center">
                   {machine.productionShift.toFixed(1)}
                 </ArgonTypography>
               </ArgonBox>
@@ -403,12 +389,8 @@ function Home() {
           </Grid>
           <Grid item xs={6}>
             <Tooltip title="Day Production" arrow placement="top">
-              <ArgonBox
-                p={0.4}
-                borderRadius="8px"
-                sx={{ cursor: "pointer" }}
-              >
-                <ArgonTypography variant="h6" fontWeight="bold" color="white" fontSize={compact ? "0.9rem" : "0.95rem"} textAlign="center">
+              <ArgonBox py={0.2}>
+                <ArgonTypography variant="h6" fontWeight="bold" color={darkMode ? "white" : "dark"} fontSize={compact ? "0.8rem" : "0.85rem"} textAlign="center">
                   {machine.productionDay.toFixed(1)}
                 </ArgonTypography>
               </ArgonBox>
@@ -416,12 +398,15 @@ function Home() {
           </Grid>
           <Grid item xs={6}>
             <Tooltip title="Power On Time" arrow placement="top">
-              <ArgonBox
-                p={0.4}
-                borderRadius="8px"
-                sx={{ cursor: "pointer" }}
-              >
-                <ArgonTypography variant="body2" fontWeight="bold" color="white" fontSize={compact ? "0.8rem" : "0.85rem"} textAlign="center">
+              <ArgonBox py={0.2}>
+                <ArgonTypography 
+                  variant="body2" 
+                  fontWeight="bold" 
+                  color={darkMode ? "white" : "dark"} 
+                  fontSize={compact ? "0.7rem" : "0.75rem"} 
+                  textAlign="center"
+                  sx={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                >
                   {machine.powerOnTime}
                 </ArgonTypography>
               </ArgonBox>

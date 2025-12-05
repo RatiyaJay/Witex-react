@@ -71,6 +71,9 @@ import Login from "layouts/login";
 import UserManagement from "layouts/user-management";
 import OrganizationManagement from "layouts/organization-management";
 import WhatsappManagement from "layouts/whatsapp-management";
+import DeviceManagement from "layouts/device-management";
+import ApprovedDevices from "layouts/approved-devices";
+import AllDevices from "layouts/all-devices";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
@@ -141,9 +144,14 @@ const routes = [
   { type: "route", name: "Logout", key: "logout", route: "/logout", icon: "logout", component: <Logout /> },
   // Hidden Login, not shown in sidenav
   { type: "hidden", key: "login", route: "/login", component: <Login /> },
+  { type: "title", title: "Admin", key: "admin-title" },
   { type: "route", name: "User Management", key: "user-management", route: "/user-management", icon: "supervised_user_circle", component: <UserManagement /> },
   { type: "route", name: "Organization Management", key: "organization-management", route: "/organization-management", icon: "domain", component: <OrganizationManagement /> },
   { type: "route", name: "WhatsApp Management", key: "whatsapp-management", route: "/whatsapp-management", icon: "chat", component: <WhatsappManagement /> },
+  { type: "title", title: "Devices", key: "devices-title" },
+  { type: "route", name: "Device Management", key: "device-management", route: "/device-management", icon: "pending_actions", component: <DeviceManagement /> },
+  { type: "route", name: "Approved Devices", key: "approved-devices", route: "/approved-devices", icon: "check_circle", component: <ApprovedDevices /> },
+  { type: "route", name: "All Devices", key: "all-devices", route: "/all-devices", icon: "devices", component: <AllDevices /> },
 ];
 
 export default routes;

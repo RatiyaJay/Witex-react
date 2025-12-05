@@ -325,7 +325,7 @@ function YarnManagement() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <ArgonTypography variant="h4">Yarn Management</ArgonTypography>
+              <ArgonTypography variant="h4" fontWeight="bold" color={darkMode ? "white" : "dark"}>Yarn Management</ArgonTypography>
               <ArgonBox display="flex" gap={1}>
                 <ArgonButton 
                   color={sidenavColor || "warning"} 

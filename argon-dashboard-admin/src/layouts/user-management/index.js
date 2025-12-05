@@ -243,7 +243,7 @@ export default function UserManagement() {
           <Grid item xs={12}>
             <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
               <ArgonBox display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                <ArgonTypography variant="h4">User Management</ArgonTypography>
+                <ArgonTypography variant="h4" fontWeight="bold" color={darkMode ? "white" : "dark"}>User Management</ArgonTypography>
                 <ArgonBox display="flex" alignItems="center" gap={2}>
                   <ArgonInput placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} sx={{ minWidth: 240 }} />
                   <ArgonButton

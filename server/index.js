@@ -10,6 +10,7 @@ const { typeDefs, resolvers } = require("./graphql/schema");
 const sequelize = require("./db/sequelize");
 const { authContext } = require("./utils/auth");
 const { ensureIndex } = require('./utils/search');
+const { startDeviceSyncScheduler } = require('./utils/deviceSync');
 
 const app = express();
 const corsOrigins = (process.env.CORS_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
@@ -52,6 +53,10 @@ async function start() {
     } catch (e) {
       console.warn('⚠️ Elasticsearch not reachable or index ensure failed');
     }
+    
+    // Start device sync scheduler
+    startDeviceSyncScheduler(5); // Sync every 5 minutes
+    
     console.log(`🚀 GraphQL ready at http://localhost:${port}/graphql`);
   });
 }

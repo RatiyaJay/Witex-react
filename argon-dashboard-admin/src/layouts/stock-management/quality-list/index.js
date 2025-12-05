@@ -218,7 +218,7 @@ function QualityList() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <ArgonBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <ArgonTypography variant="h4">Quality List</ArgonTypography>
+              <ArgonTypography variant="h4" fontWeight="bold" color={darkMode ? "white" : "dark"}>Quality List</ArgonTypography>
               <ArgonBox display="flex" gap={1}>
                 <ArgonButton 
                   color={sidenavColor || "warning"} 

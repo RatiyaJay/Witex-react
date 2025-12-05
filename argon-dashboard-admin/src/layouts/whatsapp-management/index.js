@@ -154,7 +154,7 @@ export default function WhatsappManagement() {
           <Grid item xs={12}>
             <Card sx={{ p: 2, ...getCardStyles(darkMode) }}>
               <ArgonBox display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                <ArgonTypography variant="h4">WhatsApp Management</ArgonTypography>
+                <ArgonTypography variant="h4" fontWeight="bold" color={darkMode ? "white" : "dark"}>WhatsApp Management</ArgonTypography>
                 <ArgonBox display="flex" alignItems="center" gap={2}>
                   <Select value={orgId} onChange={(e) => setOrgId(e.target.value)} sx={{ minWidth: 240 }}>
                     {orgOptions.map((o) => (<MenuItem key={o.id} value={String(o.id)}>{o.name}</MenuItem>))}
