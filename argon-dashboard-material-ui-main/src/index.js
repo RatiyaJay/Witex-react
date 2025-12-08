@@ -16,8 +16,10 @@ Coded by www.creative-tim.com
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import App from "App";
 import { Provider } from "react-redux";
+import App from "App";
+import { ApolloProvider } from "@apollo/client";
+import apolloClient from "apollo/client";
 import store from "store";
 
 // Soft UI Context Provider
@@ -35,11 +37,13 @@ const root = createRoot(container);
 root.render(
   <BrowserRouter>
     <Provider store={store}>
-      <ArgonControllerProvider>
-        <PerfectScrollbar>
-          <App />
-        </PerfectScrollbar>
-      </ArgonControllerProvider>
+      <ApolloProvider client={apolloClient}>
+        <ArgonControllerProvider>
+          <PerfectScrollbar>
+            <App />
+          </PerfectScrollbar>
+        </ArgonControllerProvider>
+      </ApolloProvider>
     </Provider>
   </BrowserRouter>
 );

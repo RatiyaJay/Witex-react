@@ -42,12 +42,16 @@ import sidenavLogoLabel from "examples/Sidenav/styles/sidenav";
 // Argon Dashboard 2 MUI context
 import { useArgonController, setMiniSidenav } from "context";
 
+// Auth utilities
+import { getUser } from "utils/auth";
+
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const [controller, dispatch] = useArgonController();
   const { miniSidenav, darkSidenav, layout } = controller;
   const location = useLocation();
   const { pathname } = location;
   const itemName = pathname.split("/").slice(1)[0];
+  const user = getUser();
 
   const closeSidenav = () => setMiniSidenav(dispatch, true);
 
@@ -137,23 +141,74 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             <Icon sx={{ fontWeight: "bold" }}>close</Icon>
           </ArgonTypography>
         </ArgonBox>
-        <ArgonBox component={NavLink} to="/" display="flex" alignItems="center">
-          {brand && (
-            <ArgonBox component="img" src={brand} alt="Argon Logo" width="2rem" mr={0.25} />
-          )}
-          <ArgonBox
-            width={!brandName && "100%"}
-            sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
-          >
-            <ArgonTypography
-              component="h6"
-              variant="button"
-              fontWeight="medium"
-              color={darkSidenav ? "white" : "dark"}
+        <ArgonBox component={NavLink} to="/" display="flex" alignItems="center" flexDirection="column">
+          <ArgonBox display="flex" alignItems="center" width="100%">
+            {brand && (
+              <ArgonBox component="img" src={brand} alt="Argon Logo" width="2rem" mr={0.25} />
+            )}
+            <ArgonBox
+              width={!brandName && "100%"}
+              sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
             >
-              {brandName}
-            </ArgonTypography>
+              <ArgonTypography
+                component="h6"
+                variant="button"
+                fontWeight="medium"
+                color={darkSidenav ? "white" : "dark"}
+              >
+                {brandName}
+              </ArgonTypography>
+            </ArgonBox>
           </ArgonBox>
+          {user?.organization?.name && !miniSidenav && (
+            <ArgonBox 
+              mt={1.5} 
+              width="100%" 
+              px={1}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <ArgonBox
+                sx={{
+                  background: darkSidenav 
+                    ? "linear-gradient(195deg, rgba(73, 163, 241, 0.15), rgba(26, 115, 232, 0.15))"
+                    : "linear-gradient(195deg, rgba(73, 163, 241, 0.1), rgba(26, 115, 232, 0.1))",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  border: darkSidenav 
+                    ? "1px solid rgba(73, 163, 241, 0.3)"
+                    : "1px solid rgba(26, 115, 232, 0.2)",
+                  boxShadow: darkSidenav
+                    ? "0 2px 8px rgba(0, 0, 0, 0.3)"
+                    : "0 2px 8px rgba(0, 0, 0, 0.08)",
+                  width: "100%",
+                  overflow: "visible",
+                  position: "relative",
+                  textAlign: "center",
+                }}
+              >
+                <ArgonTypography
+                  variant="caption"
+                  fontWeight="bold"
+                  color={darkSidenav ? "white" : "info"}
+                  sx={{
+                    fontSize: "0.85rem",
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                    display: "block",
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {user.organization.name}
+                </ArgonTypography>
+              </ArgonBox>
+            </ArgonBox>
+          )}
         </ArgonBox>
       </ArgonBox>
       <Divider light={darkSidenav} />

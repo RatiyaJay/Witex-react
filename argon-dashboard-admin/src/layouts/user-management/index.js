@@ -40,7 +40,6 @@ export default function UserManagement() {
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newName, setNewName] = useState("");
-  const [newOrganization, setNewOrganization] = useState("");
   const [newOrganizationId, setNewOrganizationId] = useState(null);
   const [newContactNo, setNewContactNo] = useState("");
   const [newRole, setNewRole] = useState("USER");
@@ -102,15 +101,14 @@ export default function UserManagement() {
   }, []);
 
   const createUser = async () => {
-    const query = `mutation Create($email:String!,$password:String!,$role:Role!,$name:String,$contactNo:String,$organization:String,$isActive:Boolean,$organizationId:ID){ createUser(email:$email,password:$password,role:$role,name:$name,contactNo:$contactNo,organization:$organization,isActive:$isActive,organizationId:$organizationId){ id } }`;
-    const res = await fetch(GRAPHQL_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ query, variables: { email: newEmail, password: newPassword, role: newRole, name: newName || null, contactNo: newContactNo || null, organization: newOrganization || null, isActive: newIsActive, organizationId: newOrganizationId || null } }) });
+    const query = `mutation Create($email:String!,$password:String!,$role:Role!,$name:String,$contactNo:String,$isActive:Boolean,$organizationId:ID){ createUser(email:$email,password:$password,role:$role,name:$name,contactNo:$contactNo,isActive:$isActive,organizationId:$organizationId){ id } }`;
+    const res = await fetch(GRAPHQL_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ query, variables: { email: newEmail, password: newPassword, role: newRole, name: newName || null, contactNo: newContactNo || null, isActive: newIsActive, organizationId: newOrganizationId || null } }) });
     const data = await res.json();
     if (data.errors) { window.alert(data.errors[0]?.message || "Create failed"); return; }
     setOpenCreate(false);
     setNewEmail("");
     setNewPassword("");
     setNewName("");
-    setNewOrganization("");
     setNewOrganizationId(null);
     setNewContactNo("");
     setNewRole("USER");
@@ -134,7 +132,7 @@ export default function UserManagement() {
   };
 
   const openEditDialog = (row) => {
-    setEditForm({ id: row.id, email: row.email, name: row.name || "", organization: row.organization || "", organizationId: row.organizationId || null, contactNo: row.contactNo || "", role: row.role || "USER", isActive: !!row.isActive });
+    setEditForm({ id: row.id, email: row.email, name: row.name || "", organizationId: row.organizationId || null, contactNo: row.contactNo || "", role: row.role || "USER", isActive: !!row.isActive });
     setOpenEdit(true);
   };
 
@@ -143,7 +141,7 @@ export default function UserManagement() {
     setSavingEdit(true);
     try {
       const query = `mutation Update($userId:ID!,$input:UpdateUserInput!){ updateUser(userId:$userId,input:$input){ id } }`;
-      const input = { email: editForm.email, name: editForm.name || null, organization: editForm.organization || null, organizationId: editForm.organizationId || null, contactNo: editForm.contactNo || null, role: editForm.role, isActive: !!editForm.isActive };
+      const input = { email: editForm.email, name: editForm.name || null, organizationId: editForm.organizationId || null, contactNo: editForm.contactNo || null, role: editForm.role, isActive: !!editForm.isActive };
       const res = await fetch(GRAPHQL_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ query, variables: { userId: editForm.id, input } }) });
       const data = await res.json();
       if (data.errors) {

@@ -23,14 +23,17 @@ function roleString(role) {
 const resolvers = {
   Mutation: {
     login: async (_, { email, password }) => {
-      const user = await db.User.findOne({ where: { email } });
+      const user = await db.User.findOne({ 
+        where: { email },
+        include: [{ model: db.Organization, as: 'organizationRef' }]
+      });
       if (!user || !user.isActive) throw new Error('Invalid credentials');
       const ok = await bcrypt.compare(password, user.passwordHash);
       if (!ok) throw new Error('Invalid credentials');
       const token = signToken({ id: user.id, email: user.email, role: user.role });
       return { token, user: toUser(user) };
     },
-    createUser: async (_, { email, password, role, name, contactNo, organization, isActive, organizationId }, ctx) => {
+    createUser: async (_, { email, password, role, name, contactNo, isActive, organizationId }, ctx) => {
       requireSuperAdmin(ctx);
       const exists = await db.User.findOne({ where: { email } });
       if (exists) throw new Error('Email already in use');
@@ -41,10 +44,10 @@ const resolvers = {
         role: roleString(role),
         name: name || null,
         contactNo: contactNo || null,
-        organization: organization || null,
         isActive: typeof isActive === 'boolean' ? isActive : true,
         organizationId: organizationId ? Number(organizationId) : null,
       });
+      await created.reload({ include: [{ model: db.Organization, as: 'organizationRef' }] });
       searchHelper.indexUser(created).catch(() => {});
       return toUser(created);
     },
@@ -67,10 +70,10 @@ const resolvers = {
       if (input.role) user.role = roleString(input.role);
       if (typeof input.name !== 'undefined') user.name = input.name;
       if (typeof input.contactNo !== 'undefined') user.contactNo = input.contactNo;
-      if (typeof input.organization !== 'undefined') user.organization = input.organization;
       if (typeof input.organizationId !== 'undefined') user.organizationId = input.organizationId ? Number(input.organizationId) : null;
       if (typeof input.isActive === 'boolean') user.isActive = input.isActive;
       await user.save();
+      await user.reload({ include: [{ model: db.Organization, as: 'organizationRef' }] });
       searchHelper.indexUser(user).catch(() => {});
       return toUser(user);
     },
@@ -127,8 +130,11 @@ function toUser(u) {
     name: u.name,
     email: u.email,
     contactNo: u.contactNo,
-    organization: u.organization,
     organizationId: u.organizationId,
+    organization: u.organizationRef ? {
+      id: u.organizationRef.id,
+      name: u.organizationRef.name,
+    } : null,
     role: toGraphRole(u.role),
     isActive: u.isActive,
     createdAt: u.createdAt.toISOString(),
@@ -159,7 +165,7 @@ function toGraphRole(dbRole) {
 const typeDefs = `
   extend type Mutation {
     login(email: String!, password: String!): AuthPayload!
-    createUser(email: String!, password: String!, role: Role!, name: String, contactNo: String, organization: String, isActive: Boolean, organizationId: ID): User!
+    createUser(email: String!, password: String!, role: Role!, name: String, contactNo: String, isActive: Boolean, organizationId: ID): User!
     updateUser(userId: ID!, input: UpdateUserInput!): User!
     deleteUser(userId: ID!): Boolean!
     updateUserPassword(userId: ID!, newPassword: String!): Boolean!

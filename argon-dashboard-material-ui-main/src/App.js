@@ -18,6 +18,9 @@ import { useState, useEffect, useMemo } from "react";
 // react-router components
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
+// Auth utilities
+import { isAuthenticated } from "utils/auth";
+
 // @mui material components
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -43,10 +46,12 @@ import createCache from "@emotion/cache";
 
 // Argon Dashboard 2 MUI routes
 import routes from "routes";
-import { getToken, isSuperAdmin } from "utils/auth";
 
 // Argon Dashboard 2 MUI contexts
 import { useArgonController, setMiniSidenav, setOpenConfigurator } from "context";
+
+// Protected Route Component
+import ProtectedRoute from "components/ProtectedRoute";
 
 // Brand logo (use single logo everywhere)
 const brand = process.env.PUBLIC_URL + "/technotexsolutions.png";
@@ -111,7 +116,19 @@ export default function App() {
       }
 
       if (route.route) {
-        return <Route exact path={route.route} element={route.component} key={route.key} />;
+        // Don't protect login and logout routes
+        if (route.key === "login" || route.key === "logout") {
+          return <Route exact path={route.route} element={route.component} key={route.key} />;
+        }
+        // Protect all other routes
+        return (
+          <Route
+            exact
+            path={route.route}
+            element={<ProtectedRoute>{route.component}</ProtectedRoute>}
+            key={route.key}
+          />
+        );
       }
 
       return null;
@@ -145,7 +162,7 @@ export default function App() {
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
         <CssBaseline />
-        {layout === "dashboard" && (
+        {layout === "dashboard" && pathname !== "/login" && (
           <>
             <Sidenav
               color={sidenavColor}
@@ -162,14 +179,14 @@ export default function App() {
         {layout === "vr" && <Configurator />}
         <Routes>
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to={isAuthenticated() ? "/home" : "/login"} />} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
   ) : (
     <ThemeProvider theme={darkMode ? themeDark : theme}>
       <CssBaseline />
-      {layout === "dashboard" && (
+      {layout === "dashboard" && pathname !== "/login" && (
         <>
           <Sidenav
             color={sidenavColor}
@@ -186,7 +203,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to={isAuthenticated() ? "/home" : "/login"} />} />
       </Routes>
     </ThemeProvider>
   );

@@ -57,6 +57,18 @@ async function start() {
     // Start device sync scheduler
     startDeviceSyncScheduler(5); // Sync every 5 minutes
     
+    // Start machine metrics scheduler
+    const { startMachineMetricsScheduler, generateTestMachineMetrics } = require('./utils/machineMetricsCalculator');
+    
+    // Generate test data on startup (for development)
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(() => {
+        generateTestMachineMetrics();
+      }, 5000); // Wait 5 seconds after startup
+    }
+    
+    startMachineMetricsScheduler(); // Calculate metrics every minute
+    
     console.log(`🚀 GraphQL ready at http://localhost:${port}/graphql`);
   });
 }

@@ -1,17 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { graphqlApi } from "services/graphqlApi";
-import firmsReducer from "store/slices/firmsSlice";
-import yarnsReducer from "store/slices/yarnsSlice";
-import beamsReducer from "store/slices/beamsSlice";
 
+// Simple store without the problematic GraphQL API for now
 const store = configureStore({
   reducer: {
-    [graphqlApi.reducerPath]: graphqlApi.reducer,
-    firms: firmsReducer,
-    yarns: yarnsReducer,
-    beams: beamsReducer,
+    // Add reducers here as needed
+    app: (state = { initialized: true }, action) => state,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(graphqlApi.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
   devTools: process.env.NODE_ENV !== "production",
 });
 

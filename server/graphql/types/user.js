@@ -6,8 +6,8 @@ const typeDefs = `
     name: String
     email: String!
     contactNo: String
-    organization: String
     organizationId: ID
+    organization: Organization
     role: Role!
     isActive: Boolean!
     createdAt: String!
@@ -18,7 +18,6 @@ const typeDefs = `
     name: String
     email: String!
     contactNo: String
-    organization: String
     password: String!
     role: Role!
     isActive: Boolean
@@ -29,7 +28,6 @@ const typeDefs = `
     name: String
     email: String
     contactNo: String
-    organization: String
     organizationId: ID
     role: Role
     isActive: Boolean

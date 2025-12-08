@@ -112,10 +112,45 @@ const resolvers2 = {
         ],
       });
 
-      return toDevice(updated);
+      return toDeviceWithDetails(updated);
     },
   },
 };
+
+function toDeviceWithDetails(d) {
+  return {
+    id: d.id,
+    deviceId: d.deviceId,
+    status: d.status.toUpperCase(),
+    machineName: d.machineName,
+    aliasMachineNo: d.aliasMachineNo,
+    isActive: Boolean(d.isActive), // Ensure it's always a boolean
+    ipv4Address: d.ipv4Address,
+    organizationId: d.organizationId,
+    approvedBy: d.approvedBy,
+    approvedAt: d.approvedAt ? d.approvedAt.toISOString() : null,
+    rejectedBy: d.rejectedBy,
+    rejectedAt: d.rejectedAt ? d.rejectedAt.toISOString() : null,
+    notes: d.notes,
+    firstSeenAt: d.firstSeenAt.toISOString(),
+    createdAt: d.createdAt.toISOString(),
+    updatedAt: d.updatedAt.toISOString(),
+    approver: d.approver ? {
+      id: d.approver.id,
+      name: d.approver.name,
+      email: d.approver.email,
+    } : null,
+    rejecter: d.rejecter ? {
+      id: d.rejecter.id,
+      name: d.rejecter.name,
+      email: d.rejecter.email,
+    } : null,
+    organization: d.organization ? {
+      id: d.organization.id,
+      name: d.organization.name,
+    } : null,
+  };
+}
 
 const typeDefs = `
   extend type Mutation {

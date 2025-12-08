@@ -120,7 +120,7 @@ function toDevice(d) {
     status: d.status.toUpperCase(),
     machineName: d.machineName,
     aliasMachineNo: d.aliasMachineNo,
-    isActive: d.isActive,
+    isActive: Boolean(d.isActive), // Ensure it's always a boolean
     ipv4Address: d.ipv4Address,
     organizationId: d.organizationId,
     approvedBy: d.approvedBy,

@@ -38,6 +38,7 @@ import Dashboard from "layouts/dashboard";
 import Home from "layouts/home";
 // Custom pages
 import MachineManagement from "layouts/machine-management";
+import MachineManagement2 from "layouts/machine-management-2";
 import ManageFirm from "layouts/manage-firm";
 import EditFirm from "layouts/manage-firm/edit";
 import YarnManagement from "layouts/yarn-management";
@@ -92,6 +93,7 @@ const routes = [
   },
   { type: "title", title: "Operations", key: "operations-title" },
   { type: "route", name: "Machine Management", key: "machine-management", route: "/machine-management", icon: "build", component: <MachineManagement /> },
+  { type: "route", name: "Machine Management 2", key: "machine-management-2", route: "/machine-management-2", icon: "precision_manufacturing", component: <MachineManagement2 /> },
   { type: "route", name: "Manage Firm", key: "manage-firm", route: "/manage-firm", icon: "business", component: <ManageFirm /> },
   // Hidden routes for add/edit firm pages (not shown in sidenav)
   { type: "hidden", key: "manage-firm-edit", route: "/manage-firm/edit/:id", component: <EditFirm /> },

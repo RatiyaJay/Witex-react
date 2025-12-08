@@ -26,6 +26,9 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import Icon from "@mui/material/Icon";
 
 // Argon Dashboard 2 MUI components
@@ -37,6 +40,7 @@ import { getUser } from "utils/auth";
 // Argon Dashboard 2 MUI example components
 import Breadcrumbs from "examples/Breadcrumbs";
 import NotificationItem from "examples/Items/NotificationItem";
+import ShiftManagement from "layouts/shift-management";
 
 // Custom styles for DashboardNavbar
 import {
@@ -65,6 +69,8 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const [controller, dispatch] = useArgonController();
   const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator } = controller;
   const [openMenu, setOpenMenu] = useState(false);
+  const [openSettingsMenu, setOpenSettingsMenu] = useState(false);
+  const [showShiftManagement, setShowShiftManagement] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
   const user = getUser();
 
@@ -98,6 +104,12 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
   const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
   const handleCloseMenu = () => setOpenMenu(false);
+  const handleOpenSettingsMenu = (event) => setOpenSettingsMenu(event.currentTarget);
+  const handleCloseSettingsMenu = () => setOpenSettingsMenu(false);
+  const handleOpenShiftManagement = () => {
+    setShowShiftManagement(true);
+    handleCloseSettingsMenu();
+  };
 
   // Render the notifications menu
   const renderMenu = () => (
@@ -179,7 +191,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
                   fontWeight="medium"
                   color={light && transparentNavbar ? "white" : "dark"}
                 >
-                  {user?.email || "Super Admin"}
+                  {user?.name || user?.email || "User"}
                 </ArgonTypography>
               </IconButton>
               <IconButton
@@ -194,10 +206,29 @@ function DashboardNavbar({ absolute, light, isMini }) {
                 size="small"
                 color={light && transparentNavbar ? "white" : "dark"}
                 sx={navbarIconButton}
-                onClick={handleConfiguratorOpen}
+                onClick={handleOpenSettingsMenu}
               >
                 <Icon>settings</Icon>
               </IconButton>
+              <Menu
+                anchorEl={openSettingsMenu}
+                open={Boolean(openSettingsMenu)}
+                onClose={handleCloseSettingsMenu}
+                sx={{ mt: 2 }}
+              >
+                <MenuItem onClick={handleOpenShiftManagement}>
+                  <ListItemIcon>
+                    <Icon fontSize="small">schedule</Icon>
+                  </ListItemIcon>
+                  <ListItemText>Shift Management</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => { handleConfiguratorOpen(); handleCloseSettingsMenu(); }}>
+                  <ListItemIcon>
+                    <Icon fontSize="small">palette</Icon>
+                  </ListItemIcon>
+                  <ListItemText>Theme Settings</ListItemText>
+                </MenuItem>
+              </Menu>
               <IconButton
                 size="small"
                 color={light && transparentNavbar ? "white" : "dark"}
@@ -214,6 +245,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
           </ArgonBox>
         )}
       </Toolbar>
+      <ShiftManagement open={showShiftManagement} onClose={() => setShowShiftManagement(false)} />
     </AppBar>
   );
 }

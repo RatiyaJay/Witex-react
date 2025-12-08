@@ -6,7 +6,9 @@ const resolvers = {
   Query: {
     me: async (_, __, ctx) => {
       if (!ctx.user) return null;
-      const u = await db.User.findByPk(ctx.user.id);
+      const u = await db.User.findByPk(ctx.user.id, {
+        include: [{ model: db.Organization, as: 'organizationRef' }]
+      });
       if (!u) return null;
       return toUser(u);
     },
@@ -25,7 +27,11 @@ const resolvers = {
         try {
           const { esSearchIds, esTotal } = await require('../searchHelper').searchUsers(search, page, limit);
           count = esTotal;
-          rows = await db.User.findAll({ where: { id: esSearchIds }, order: [['id', 'ASC']] });
+          rows = await db.User.findAll({ 
+            where: { id: esSearchIds }, 
+            include: [{ model: db.Organization, as: 'organizationRef' }],
+            order: [['id', 'ASC']] 
+          });
         } catch (_) {
           const term = `%${search}%`;
           const res = await db.User.findAndCountAll({
@@ -33,10 +39,10 @@ const resolvers = {
               [Op.or]: [
                 { name: { [Op.like]: term } },
                 { email: { [Op.like]: term } },
-                { organization: { [Op.like]: term } },
                 { contactNo: { [Op.like]: term } },
               ],
             },
+            include: [{ model: db.Organization, as: 'organizationRef' }],
             limit,
             offset,
             order: [['id', 'ASC']],
@@ -45,7 +51,12 @@ const resolvers = {
           count = res.count;
         }
       } else {
-        const res = await db.User.findAndCountAll({ limit, offset, order: [['id', 'ASC']] });
+        const res = await db.User.findAndCountAll({ 
+          include: [{ model: db.Organization, as: 'organizationRef' }],
+          limit, 
+          offset, 
+          order: [['id', 'ASC']] 
+        });
         rows = res.rows;
         count = res.count;
       }
@@ -65,8 +76,11 @@ function toUser(u) {
     name: u.name,
     email: u.email,
     contactNo: u.contactNo,
-    organization: u.organization,
     organizationId: u.organizationId,
+    organization: u.organizationRef ? {
+      id: u.organizationRef.id,
+      name: u.organizationRef.name,
+    } : null,
     role: toGraphRole(u.role),
     isActive: u.isActive,
     createdAt: u.createdAt.toISOString(),

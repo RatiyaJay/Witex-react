@@ -1,30 +1,16 @@
 import { useEffect } from "react";
-import Grid from "@mui/material/Grid";
-import ArgonBox from "components/ArgonBox";
-import ArgonTypography from "components/ArgonTypography";
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
+import { useNavigate } from "react-router-dom";
+import { logout } from "utils/auth";
 
 function Logout() {
-  useEffect(() => {
-    // Placeholder: clear any session storage/local storage tokens here
-    // localStorage.removeItem("token");
-  }, []);
+  const navigate = useNavigate();
 
-  return (
-    <DashboardLayout>
-      <DashboardNavbar />
-      <ArgonBox py={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <ArgonTypography variant="h4">You have been logged out</ArgonTypography>
-          </Grid>
-        </Grid>
-      </ArgonBox>
-      <Footer />
-    </DashboardLayout>
-  );
+  useEffect(() => {
+    logout();
+    navigate("/login");
+  }, [navigate]);
+
+  return null;
 }
 
 export default Logout;
